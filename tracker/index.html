@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker — Built by Bots</title>
+    <link rel="canonical" href="https://builtbybots.show/tracker/">
+    <link rel="icon" href="/assets/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/amiga.css">
+    <style>
+        .tk-wrap{max-width:920px;margin:0 auto;padding:40px 24px 80px}
+        .tk-hd h1{color:var(--glow);font-size:1.8em;margin-bottom:4px}
+        .tk-hd p{color:var(--fg3);font-size:.9em;margin-bottom:28px}
+        .tk-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end}
+        .tk-field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);margin-bottom:5px}
+        .tk-field input{background:var(--card);border:1px solid var(--border);color:var(--ink);padding:7px 10px;border-radius:2px;font-family:var(--mono);font-size:.85em}
+        .tk-field input[type="text"]{width:220px}
+        .tk-field input[type="number"]{width:70px}
+        .tk-panel{background:var(--card);border:1px solid var(--border);border-radius:2px;padding:18px;margin-bottom:22px}
+        .tk-panel h2{font-size:1em;color:var(--ink);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+        .inst-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.88em;border-bottom:1px solid var(--border)}
+        .inst-row:last-child{border-bottom:none}
+        .inst-row .inst-num{font-family:var(--mono);color:var(--glow);width:24px}
+        .inst-row .inst-name{flex:1;color:var(--ink)}
+        .inst-row .inst-meta{color:var(--fg3);font-family:var(--mono);font-size:.85em}
+        .inst-row button{background:none;border:1px solid var(--border);color:var(--fg3);padding:4px 10px;border-radius:2px;cursor:pointer;font-size:.8em}
+        .inst-row button:hover{border-color:var(--glow);color:var(--glow)}
+        #instEmpty{color:var(--fg3);font-size:.88em;font-style:italic}
+        .grid-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:2px}
+        table.pgrid{border-collapse:collapse;font-family:var(--mono);font-size:.78em;width:100%}
+        table.pgrid th{background:var(--bg2);color:var(--fg3);padding:6px 4px;text-align:center;letter-spacing:.06em;text-transform:uppercase;font-size:.9em;border-bottom:1px solid var(--border);position:sticky;top:0}
+        table.pgrid td.rownum{color:var(--fg3);text-align:right;padding:3px 8px;background:var(--bg2)}
+        table.pgrid td.cell{padding:3px 10px;text-align:center;color:var(--ink);cursor:pointer;border-left:1px solid var(--border);white-space:nowrap;user-select:none}
+        table.pgrid td.cell:hover{background:rgba(53,243,154,.06)}
+        table.pgrid td.cell.selected{background:rgba(53,243,154,.18);outline:1px solid var(--glow)}
+        table.pgrid tr:nth-child(4n+1) td{background:rgba(255,255,255,.02)}
+        table.pgrid tr:nth-child(4n+1) td.selected{background:rgba(53,243,154,.2)}
+        .edit-panel{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+        .edit-panel select{background:var(--card);border:1px solid var(--border);color:var(--ink);padding:7px 10px;border-radius:2px;font-family:var(--mono);font-size:.85em}
+        .tk-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+        #tkStatus{font-family:var(--mono);font-size:.82em;color:var(--fg3);margin-top:10px}
+        #tkStatus.error{color:#e05b5b}
+        #tkStatus.ok{color:var(--glow)}
+    </style>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <a class="brand" href="/"><img src="/assets/banner.png" alt="Built by Bots" style="height:26px;width:auto;vertical-align:middle"></a>
+  <div class="navlinks">
+    <a href="/about/" class="hidesm">About</a>
+    <a href="/shows/">Shows</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/aria/" style="color:var(--purple2)" class="hidesm">Aria</a>
+    <div class="nav-dropdown hidesm">
+      <a class="dropdown-toggle">Team</a>
+      <div class="dropdown-menu">
+        <a href="/ami/" style="color:var(--ami)">Ami</a>
+        <a href="/blog/hal/" style="color:var(--hal)">Hal</a>
+        <a href="/blog/hermes/" style="color:var(--hermes)">Hermes</a>
+        <a href="/ghost/">Ghost</a>
+      </div>
+    </div>
+    <a href="/ami/" style="color:var(--ami)" class="nav-mobile-team">Ami</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener" class="hidesm">BBS</a>
+    <a href="/store/" style="color:var(--glow)">Store</a>
+    <a href="/#subscribe" class="btn btn-primary">Subscribe</a>
+  </div>
+</nav></div></header>
+
+<div class="tk-wrap">
+  <div class="tk-hd">
+    <h1>▸ .bbbmod Tracker</h1>
+    <p>Build a song, hear it live, download the real file. 4 channels, 32 rows, one pattern to start. New here? <a href="/tracker/guide/" style="color:var(--glow)">Read the Guide</a> — Quick Start gets you to a sound in under a minute.</p>
+    <p id="tkGateMsg" style="font-family:var(--mono);font-size:.82em;color:var(--fg3)"></p>
+  </div>
+
+  <div class="tk-row">
+    <div class="tk-field"><label>Song Name</label><input type="text" id="songName" value="Untitled" maxlength="31"></div>
+    <div class="tk-field"><label>Tempo (BPM)</label><input type="number" id="tempo" value="125" min="32" max="255"></div>
+    <div class="tk-field"><label>Speed</label><input type="number" id="speed" value="6" min="1" max="31"></div>
+  </div>
+
+  <div class="tk-panel">
+    <h2>Instruments</h2>
+    <div id="instList"><p id="instEmpty">No instruments yet — upload a WAV or MP3 below.</p></div>
+    <div style="margin-top:12px">
+      <label class="btn btn-ghost" style="cursor:pointer;display:inline-block">
+        Upload Sample
+        <input type="file" id="sampleUpload" accept="audio/wav,audio/mpeg,audio/mp3" style="display:none">
+      </label>
+    </div>
+  </div>
+
+  <div class="tk-panel">
+    <h2>Pattern</h2>
+    <div class="grid-wrap">
+      <table class="pgrid" id="pgrid"></table>
+    </div>
+    <div class="edit-panel" style="margin-top:16px">
+      <div class="tk-field"><label>Note</label><select id="editNote"></select></div>
+      <div class="tk-field"><label>Instrument</label><select id="editInst"></select></div>
+      <div class="tk-field"><label>Volume (0-64)</label><input type="number" id="editVol" min="0" max="64" value="48" style="width:70px"></div>
+      <button class="btn btn-ghost" id="editApply">Set Cell</button>
+      <button class="btn btn-ghost" id="editClear">Clear Cell</button>
+    </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:10px">Click a cell to select it (arrow keys also move the selection), then use the controls above to set or clear it.</p>
+  </div>
+
+  <div class="tk-actions">
+    <button class="btn btn-primary" id="btnPreview">▶ Preview</button>
+    <button class="btn btn-ghost" id="btnStop">■ Stop</button>
+    <button class="btn btn-ghost" id="btnDownload">⇩ Download .bbbmod</button>
+    <button class="btn btn-primary" id="btnPublish" disabled>&#9737; Publish to the site</button>
+  </div>
+  <div id="tkStatus"></div>
+
+  <div class="tk-panel" id="tkMyMods" style="display:none;margin-top:24px">
+    <h2>Your Published Mods</h2>
+    <div id="tkMyModsList"></div>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <div style="font-family:var(--mono);font-size:11px;letter-spacing:.06em">&copy; <span id="yr"></span> BUILT BY BOTS &middot; QUICKQUEST DIGITAL</div>
+</div></footer>
+
+<script src="/assets/bbbmod-player.js"></script>
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+// --- Publish gate: publishing (not preview/download, those stay free for
+// everyone) requires a signed-in, active $10+/mo Patreon membership, same
+// threshold as ROM Storage. /api/user/me is the same endpoint auth-nav.js
+// already uses site-wide for the nav Subscribe button.
+let authState = { loggedIn: false, isPatron: false, username: '' };
+fetch('/api/user/me', { credentials: 'same-origin' })
+  .then(r => r.json())
+  .then(data => {
+    authState = data;
+    const gateMsg = document.getElementById('tkGateMsg');
+    const publishBtn = document.getElementById('btnPublish');
+    if (!data.loggedIn) {
+      gateMsg.innerHTML = 'Publishing your track for everyone to hear needs a Patreon sign-in — <a href="/auth/patreon/login" style="color:var(--glow)">Sign in with Patreon</a>. Preview and download work without one.';
+    } else if (!data.isPatron) {
+      gateMsg.textContent = `Signed in as ${data.username}. Publishing needs an active $10+/mo Patreon membership — preview and download still work.`;
+    } else {
+      gateMsg.textContent = `Signed in as ${data.username} (Patron) — you can publish.`;
+      publishBtn.disabled = false;
+    }
+    if (data.loggedIn) refreshMyMods();
+  })
+  .catch(() => {
+    document.getElementById('tkGateMsg').textContent = 'Could not check sign-in status — publishing is unavailable right now, but preview and download still work.';
+  });
+
+async function refreshMyMods() {
+  try {
+    const resp = await fetch('/api/mods/mine', { credentials: 'same-origin' });
+    const data = await resp.json();
+    if (!data.ok) return;
+    const panel = document.getElementById('tkMyMods');
+    const list = document.getElementById('tkMyModsList');
+    if (data.mods.length === 0) { panel.style.display = 'none'; return; }
+    panel.style.display = '';
+    list.innerHTML = '';
+    data.mods.forEach(mod => {
+      const row = document.createElement('div');
+      row.className = 'inst-row';
+      const when = new Date(mod.createdAt).toLocaleDateString();
+      row.innerHTML = `<span class="inst-name">${mod.title}</span><span class="inst-meta">published ${when}</span>`;
+      const btn = document.createElement('button');
+      btn.textContent = 'Unpublish';
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          const delResp = await fetch(`/api/mods/${mod.id}`, { method: 'DELETE', credentials: 'same-origin' });
+          const delData = await delResp.json();
+          if (!delResp.ok || !delData.ok) throw new Error(delData.error || 'unpublish failed');
+          refreshMyMods();
+        } catch (err) {
+          setStatus('Unpublish failed: ' + err.message, 'error');
+          btn.disabled = false;
+        }
+      });
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  } catch {}
+}
+
+const CHANNELS = 4;
+const ROWS = 32;
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// note byte <-> note name, matching the encoding pinned down in Phase 1:
+// byte 0 = empty, byte 49 = "C-4" (unison / the pitch a sample was
+// recorded at), each semitone step +/-1 byte.
+function noteByteToName(b) {
+  if (b === 0) return '---';
+  const semitoneFromC4 = b - 49;
+  const octave = 4 + Math.floor(semitoneFromC4 / 12);
+  let idx = semitoneFromC4 % 12;
+  if (idx < 0) idx += 12;
+  return NOTE_NAMES[idx] + octave;
+}
+function noteNameToByte(name) {
+  const m = /^([A-G]#?)(-?\d+)$/.exec(name);
+  if (!m) return 0;
+  const idx = NOTE_NAMES.indexOf(m[1]);
+  const octave = parseInt(m[2], 10);
+  const semitoneFromC4 = (octave - 4) * 12 + idx;
+  return 49 + semitoneFromC4;
+}
+
+// --- Editor state ---
+const state = {
+  instruments: [], // { name, audioBuffer, volume }
+  cells: new Uint8Array(ROWS * CHANNELS * 5), // note, instrument, volume, effect, effectParam
+};
+let selected = { row: 0, ch: 0 };
+
+function cellOffset(row, ch) { return (row * CHANNELS + ch) * 5; }
+
+// --- Instrument list UI ---
+function renderInstruments() {
+  const list = document.getElementById('instList');
+  const empty = document.getElementById('instEmpty');
+  if (state.instruments.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    return;
+  }
+  list.innerHTML = '';
+  state.instruments.forEach((inst, i) => {
+    const row = document.createElement('div');
+    row.className = 'inst-row';
+    row.innerHTML = `<span class="inst-num">${i + 1}</span><span class="inst-name">${inst.name}</span>` +
+      `<span class="inst-meta">${inst.audioBuffer.sampleRate}Hz · ${inst.audioBuffer.duration.toFixed(2)}s</span>` +
+      `<button data-i="${i}">Remove</button>`;
+    row.querySelector('button').addEventListener('click', () => {
+      state.instruments.splice(i, 1);
+      renderInstruments();
+      populateInstrumentSelect();
+    });
+    list.appendChild(row);
+  });
+  populateInstrumentSelect();
+}
+
+function populateInstrumentSelect() {
+  const sel = document.getElementById('editInst');
+  sel.innerHTML = '<option value="0">(none)</option>';
+  state.instruments.forEach((inst, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = `${i + 1}: ${inst.name}`;
+    sel.appendChild(opt);
+  });
+}
+
+function populateNoteSelect() {
+  const sel = document.getElementById('editNote');
+  sel.innerHTML = '<option value="0">--- (empty)</option>';
+  for (let octave = 2; octave <= 6; octave++) {
+    NOTE_NAMES.forEach((n, idx) => {
+      const b = noteNameToByte(n + octave);
+      if (b < 1 || b > 255) return;
+      const opt = document.createElement('option');
+      opt.value = b;
+      opt.textContent = n + octave;
+      sel.appendChild(opt);
+    });
+  }
+}
+populateNoteSelect();
+
+document.getElementById('sampleUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const arrayBuf = await file.arrayBuffer();
+  try {
+    const audioBuffer = await ctx.decodeAudioData(arrayBuf);
+    state.instruments.push({ name: file.name.replace(/\.[^.]+$/, '').slice(0, 21), audioBuffer, volume: 64 });
+    renderInstruments();
+    setStatus(`Loaded "${file.name}" as instrument ${state.instruments.length}`, 'ok');
+  } catch (err) {
+    setStatus('Could not decode that audio file: ' + err.message, 'error');
+  }
+  e.target.value = '';
+});
+
+// --- Pattern grid UI ---
+function renderGrid() {
+  const table = document.getElementById('pgrid');
+  let html = '<tr><th>Row</th>';
+  for (let ch = 0; ch < CHANNELS; ch++) html += `<th>Ch ${ch + 1}</th>`;
+  html += '</tr>';
+  for (let row = 0; row < ROWS; row++) {
+    html += `<tr><td class="rownum">${row.toString().padStart(2, '0')}</td>`;
+    for (let ch = 0; ch < CHANNELS; ch++) {
+      const off = cellOffset(row, ch);
+      const note = state.cells[off];
+      const inst = state.cells[off + 1];
+      const vol = state.cells[off + 2];
+      const text = note === 0 ? '···' : `${noteByteToName(note)} ${String(inst).padStart(2, '0')} ${String(vol).padStart(2, '0')}`;
+      const sel = (row === selected.row && ch === selected.ch) ? ' selected' : '';
+      html += `<td class="cell${sel}" data-row="${row}" data-ch="${ch}">${text}</td>`;
+    }
+    html += '</tr>';
+  }
+  table.innerHTML = html;
+  table.querySelectorAll('td.cell').forEach(td => {
+    td.addEventListener('click', () => {
+      selected = { row: parseInt(td.dataset.row, 10), ch: parseInt(td.dataset.ch, 10) };
+      syncEditPanel();
+      renderGrid();
+    });
+  });
+}
+
+function syncEditPanel() {
+  const off = cellOffset(selected.row, selected.ch);
+  document.getElementById('editNote').value = state.cells[off];
+  document.getElementById('editInst').value = state.cells[off + 1];
+  document.getElementById('editVol').value = state.cells[off + 2] || 48;
+}
+
+document.getElementById('editApply').addEventListener('click', () => {
+  const off = cellOffset(selected.row, selected.ch);
+  state.cells[off] = parseInt(document.getElementById('editNote').value, 10);
+  state.cells[off + 1] = parseInt(document.getElementById('editInst').value, 10);
+  state.cells[off + 2] = parseInt(document.getElementById('editVol').value, 10) || 0;
+  renderGrid();
+});
+document.getElementById('editClear').addEventListener('click', () => {
+  const off = cellOffset(selected.row, selected.ch);
+  state.cells[off] = 0; state.cells[off + 1] = 0; state.cells[off + 2] = 0;
+  renderGrid();
+  syncEditPanel();
+});
+document.addEventListener('keydown', (e) => {
+  if (document.activeElement && ['INPUT', 'SELECT'].includes(document.activeElement.tagName)) return;
+  let { row, ch } = selected;
+  if (e.key === 'ArrowDown') row = Math.min(ROWS - 1, row + 1);
+  else if (e.key === 'ArrowUp') row = Math.max(0, row - 1);
+  else if (e.key === 'ArrowRight') ch = Math.min(CHANNELS - 1, ch + 1);
+  else if (e.key === 'ArrowLeft') ch = Math.max(0, ch - 1);
+  else return;
+  e.preventDefault();
+  selected = { row, ch };
+  syncEditPanel();
+  renderGrid();
+});
+
+// --- Encoder: mirrors tools/make-test-bbbmod.js, generalized for editor state ---
+function audioBufferToPCM16Mono(audioBuffer) {
+  const length = audioBuffer.length;
+  const out = new Int16Array(length);
+  const chData = audioBuffer.getChannelData(0); // mono only for v1 -- downmix not needed since we take channel 0
+  for (let i = 0; i < length; i++) {
+    const s = Math.max(-1, Math.min(1, chData[i]));
+    out[i] = Math.round(s * 32767);
+  }
+  return out;
+}
+
+function encodeBBBMOD() {
+  const songName = document.getElementById('songName').value.slice(0, 31);
+  const tempo = parseInt(document.getElementById('tempo').value, 10) || 125;
+  const speed = parseInt(document.getElementById('speed').value, 10) || 6;
+  // Credited author -- only meaningful once signed in (publish requires it
+  // anyway); local preview/download works with an empty author same as
+  // before, decoder already defaults a missing v01 author to ''.
+  const author = (authState.loggedIn && authState.username) ? authState.username : '';
+
+  const instPCMs = state.instruments.map(inst => audioBufferToPCM16Mono(inst.audioBuffer));
+  const headerSize = 8 + 32 + 16 + 1 + 2 + 1 + 2 + 1 + 1 + 1;
+  const instHeaderSize = 22 + 4 + 4 + 1 + 1 + 4 + 4 + 1;
+  let instTotal = 0;
+  instPCMs.forEach(pcm => { instTotal += instHeaderSize + pcm.length * 2; });
+  const patternDataSize = 1 + ROWS * CHANNELS * 5;
+  const totalSize = headerSize + instTotal + patternDataSize;
+
+  const buf = new ArrayBuffer(totalSize);
+  const view = new DataView(buf);
+  const bytes = new Uint8Array(buf);
+  let off = 0;
+
+  function writeStr(str, len) {
+    const enc = new TextEncoder().encode(str);
+    bytes.set(enc.subarray(0, len), off);
+    off += len;
+  }
+
+  writeStr('BBBMOD02', 8);
+  writeStr(songName, 32);
+  writeStr(author, 16);
+  view.setUint8(off, CHANNELS); off += 1;
+  view.setUint16(off, 1, true); off += 2; // pattern count = 1
+  view.setUint8(off, state.instruments.length); off += 1;
+  view.setUint16(off, 1, true); off += 2; // song length = 1
+  view.setUint8(off, tempo); off += 1;
+  view.setUint8(off, speed); off += 1;
+  view.setUint8(off, 0); off += 1; // pattern order: [0]
+
+  state.instruments.forEach((inst, i) => {
+    writeStr(inst.name, 22);
+    const pcm = instPCMs[i];
+    view.setUint32(off, pcm.length, true); off += 4;
+    view.setUint32(off, inst.audioBuffer.sampleRate, true); off += 4;
+    view.setUint8(off, 16); off += 1; // bit depth
+    view.setUint8(off, 1); off += 1;  // channels (mono)
+    view.setUint32(off, 0, true); off += 4; // loop start
+    view.setUint32(off, 0, true); off += 4; // loop length
+    view.setUint8(off, inst.volume); off += 1;
+    for (let s = 0; s < pcm.length; s++) { view.setInt16(off, pcm[s], true); off += 2; }
+  });
+
+  view.setUint8(off, ROWS); off += 1;
+  bytes.set(state.cells, off); off += state.cells.length;
+
+  return buf;
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('tkStatus');
+  el.textContent = msg;
+  el.className = cls || '';
+}
+
+let previewPlayer = null;
+document.getElementById('btnPreview').addEventListener('click', () => {
+  if (state.instruments.length === 0) { setStatus('Add at least one instrument first.', 'error'); return; }
+  try {
+    const buf = encodeBBBMOD();
+    const song = decodeBBBMOD(buf); // round-trips through the real decoder -- proves encoder correctness every time
+    if (!previewPlayer) previewPlayer = new BBBModPlayer();
+    previewPlayer.ctx = previewPlayer.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    previewPlayer.song = song;
+    previewPlayer.audioBuffers = song.instruments.map(inst => instrumentToAudioBuffer(previewPlayer.ctx, inst));
+    previewPlayer.play();
+    setStatus(`Playing "${song.songName}"...`, 'ok');
+  } catch (err) {
+    setStatus('Preview failed: ' + err.message, 'error');
+  }
+});
+document.getElementById('btnStop').addEventListener('click', () => {
+  if (previewPlayer) previewPlayer.stop();
+  setStatus('Stopped');
+});
+document.getElementById('btnDownload').addEventListener('click', () => {
+  if (state.instruments.length === 0) { setStatus('Add at least one instrument first.', 'error'); return; }
+  const buf = encodeBBBMOD();
+  const blob = new Blob([buf], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (document.getElementById('songName').value || 'untitled').replace(/[^a-z0-9_-]/gi, '_') + '.bbbmod';
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus('Downloaded.', 'ok');
+});
+
+document.getElementById('btnPublish').addEventListener('click', async () => {
+  if (!authState.loggedIn) { setStatus('Sign in with Patreon first.', 'error'); return; }
+  if (!authState.isPatron) { setStatus('Publishing needs an active $10+/mo Patreon membership.', 'error'); return; }
+  if (state.instruments.length === 0) { setStatus('Add at least one instrument first.', 'error'); return; }
+
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true;
+  setStatus('Publishing…');
+  try {
+    const buf = encodeBBBMOD();
+    const blob = new Blob([buf], { type: 'application/octet-stream' });
+    const form = new FormData();
+    form.append('modfile', blob, 'track.bbbmod');
+    const resp = await fetch('/api/mods/publish', { method: 'POST', body: form, credentials: 'same-origin' });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || `publish failed (${resp.status})`);
+    setStatus(`Published "${data.title}" — it's live in the floating player now.`, 'ok');
+    refreshMyMods();
+  } catch (err) {
+    setStatus('Publish failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = !authState.isPatron ? true : false;
+  }
+});
+
+renderInstruments();
+renderGrid();
+</script>
+
+</body>
+</html>

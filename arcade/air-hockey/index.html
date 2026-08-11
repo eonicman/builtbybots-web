@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Air Hockey — Built by Bots Arcade</title>
+<meta name="description" content="Air Hockey — vertical, fast, direct-sold ad slots on the goal ends. Part of the Built by Bots Avatar Arcade. Play in your browser or on the BBS.">
+<link rel="canonical" href="https://builtbybots.show/arcade/air-hockey/">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta property="og:title" content="Air Hockey — Built by Bots Arcade">
+<meta property="og:description" content="Vertical air hockey against an AI or a friend. Part of the Avatar Arcade.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://builtbybots.show/arcade/air-hockey/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/arcade/shared/ads.css">
+<style>
+  :root{
+    --bg:#0a0a12; --house:#38bdf8; --house2:#93e2ff; --house-dim:rgba(56,189,248,.16);
+    --fg:#c8c8d4; --fg2:#9ca3af; --mono:'Space Mono','Courier New',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--mono);
+    min-height:100%;-webkit-tap-highlight-color:transparent}
+  .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100%;padding:12px;gap:10px}
+  header{text-align:center}
+  h1{margin:0;font-size:20px;letter-spacing:.08em;color:var(--house2);
+    text-shadow:0 0 12px var(--house-dim)}
+  .sub{margin:4px 0 0;font-size:11px;color:var(--fg2);letter-spacing:.04em}
+  .rink-col{display:flex;flex-direction:column;align-items:center;gap:0;width:400px;max-width:92vw}
+  .stage{position:relative;border-left:2px solid var(--house);border-right:2px solid var(--house);
+    box-shadow:0 0 24px var(--house-dim), inset 0 0 40px rgba(0,0,0,.6);
+    background:#050508;overflow:hidden;width:100%}
+  canvas{display:block;width:100%;height:auto;image-rendering:pixelated;cursor:pointer}
+  .scanlines{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0px,rgba(0,0,0,.25) 1px,
+      transparent 2px,transparent 3px);mix-blend-mode:multiply;opacity:.5}
+  .vignette{position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 0 80px 20px rgba(0,0,0,.7)}
+  .hud{display:flex;justify-content:space-between;width:400px;max-width:92vw;
+    font-size:12px;color:var(--fg2)}
+  .hud a{color:var(--house2);text-decoration:none}
+  .hud a:hover{text-decoration:underline}
+  .controls{font-size:11px;color:var(--fg2);text-align:center;max-width:640px;line-height:1.6}
+  .controls b{color:var(--house2)}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:rgba(5,5,8,.88);gap:14px;text-align:center;padding:20px;z-index:5}
+  .overlay.hidden{display:none}
+  .overlay h2{margin:0;color:var(--house2);font-size:22px;letter-spacing:.06em}
+  .overlay p{margin:0;color:var(--fg2);font-size:13px;max-width:320px}
+  .btn{font-family:var(--mono);font-size:13px;padding:10px 18px;border-radius:4px;
+    border:1px solid var(--house);background:var(--house-dim);color:var(--house2);
+    cursor:pointer;letter-spacing:.04em}
+  .btn:hover{background:var(--house);color:#0a0a12}
+  .mode-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .goal-flash{position:absolute;left:0;right:0;text-align:center;font-size:26px;font-weight:700;
+    color:var(--house2);text-shadow:0 0 16px var(--house);opacity:0;pointer-events:none;top:44%}
+  .goal-flash.show{animation:flash 1s ease-out forwards}
+  @keyframes flash{0%{opacity:0;transform:scale(.9)}20%{opacity:1;transform:scale(1.05)}70%{opacity:1}100%{opacity:0}}
+  .ad-below{margin-top:6px}
+</style>
+</head>
+<body>
+<a href="/arcade/" style="position:fixed;top:12px;left:16px;z-index:9999;font-family:var(--mono),monospace;font-size:12px;color:#9ca3af;text-decoration:none;">← Back to Arcade</a>
+<div class="wrap">
+  <header>
+    <h1>▸ AIR HOCKEY</h1>
+    <p class="sub">Avatar Arcade — Built by Bots</p>
+  </header>
+
+  <div class="rink-col">
+    <div class="ad-slot bbb-ad-slot" data-ad-slot="air-hockey-top" data-ad-kind="banner"></div>
+    <div class="stage" id="stage">
+      <canvas id="c" width="400" height="560"></canvas>
+      <div class="scanlines"></div>
+      <div class="vignette"></div>
+      <div class="goal-flash" id="goalFlash"></div>
+
+      <div class="overlay" id="startOverlay">
+        <h2>AIR HOCKEY</h2>
+        <p>First to 7. Mouse/touch to move your mallet (1P), or WASD vs Arrow Keys for hot seat.</p>
+        <div class="mode-row">
+          <button class="btn" id="btn1p">1 Player (vs CPU)</button>
+          <button class="btn" id="btn2p">2 Player</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="endOverlay">
+        <h2 id="endTitle">GAME OVER</h2>
+        <button class="btn" id="btnAgain">Play Again</button>
+      </div>
+    </div>
+    <div class="ad-slot bbb-ad-slot" data-ad-slot="air-hockey-bottom" data-ad-kind="banner"></div>
+  </div>
+
+  <div class="hud">
+    <span>Best streak: <b id="bestStreak" style="color:var(--house2)">0</b></span>
+    <a href="/arcade/">← Arcade</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener">BBS →</a>
+  </div>
+
+  <div class="controls">Built by an AI agent, on an Amiga-styled render pipeline, for a BBS that shouldn't still exist. <b>bbs.eonic.cloud</b> has more.</div>
+
+  <div class="ad-slot bbb-ad-slot ad-below" data-ad-slot="air-hockey-below" data-ad-kind="panel"></div>
+</div>
+
+<script src="/arcade/shared/ads.js"></script>
+<script>
+(function(){
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const HOUSE = '#38bdf8', HOUSE2 = '#93e2ff', BG = '#050508';
+  const GOAL_W = 140; // width of the goal opening, centered on each short edge
+  const PUCK_R = 10, MALLET_R = 22;
+  const WIN_SCORE = 7;
+  const MID_Y = H / 2;
+
+  let mode = null; // '1p' | '2p'
+  let running = false;
+  let p1 = { x: W/2, y: H - 70 }; // bottom, human (or player1 in 2p)
+  let p2 = { x: W/2, y: 70 };     // top, CPU (or player2 in 2p)
+  let p1v = {x:0,y:0}, p2v = {x:0,y:0}; // for hit-transfer feel
+  let puck = { x: W/2, y: H/2, vx: 0, vy: 0 };
+  let scoreP1 = 0, scoreP2 = 0;
+  let trail = [];
+  let bestStreak = parseInt(localStorage.getItem('airHockeyBestStreak') || '0', 10);
+  document.getElementById('bestStreak').textContent = bestStreak;
+  let streak = 0;
+
+  const mouse = { x: W/2, y: H - 70, active: false };
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width, scaleY = H / rect.height;
+    mouse.x = (e.clientX - rect.left) * scaleX;
+    mouse.y = (e.clientY - rect.top) * scaleY;
+    mouse.active = true;
+  });
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width, scaleY = H / rect.height;
+    mouse.x = (t.clientX - rect.left) * scaleX;
+    mouse.y = (t.clientY - rect.top) * scaleY;
+    mouse.active = true;
+  }, { passive: false });
+
+  const keys = {};
+  window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+  window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+  function resetPuck(towardP1) {
+    puck.x = W / 2; puck.y = H / 2;
+    const speed = 3.6;
+    puck.vx = (Math.random() * 2 - 1) * speed * 0.7;
+    puck.vy = (towardP1 ? 1 : -1) * speed;
+    trail = [];
+  }
+
+  function startGame(m) {
+    mode = m;
+    p1 = { x: W/2, y: H - 70 }; p2 = { x: W/2, y: 70 };
+    p1v = {x:0,y:0}; p2v = {x:0,y:0};
+    scoreP1 = 0; scoreP2 = 0; streak = 0;
+    resetPuck(Math.random() < 0.5);
+    running = true;
+    document.getElementById('startOverlay').classList.add('hidden');
+    document.getElementById('endOverlay').classList.add('hidden');
+    requestAnimationFrame(loop);
+  }
+
+  function showGoalFlash(text) {
+    const el = document.getElementById('goalFlash');
+    el.textContent = text;
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  }
+
+  function endGame(winnerIsP1) {
+    running = false;
+    if (streak > bestStreak) {
+      bestStreak = streak;
+      localStorage.setItem('airHockeyBestStreak', String(bestStreak));
+      document.getElementById('bestStreak').textContent = bestStreak;
+    }
+    document.getElementById('endTitle').textContent = winnerIsP1 ? 'YOU WIN' : (mode === '1p' ? 'CPU WINS' : 'TOP WINS');
+    document.getElementById('endOverlay').classList.remove('hidden');
+  }
+
+  function clampToHalf(pt, isBottomHalf) {
+    pt.x = Math.max(MALLET_R, Math.min(W - MALLET_R, pt.x));
+    if (isBottomHalf) pt.y = Math.max(MID_Y + MALLET_R, Math.min(H - MALLET_R, pt.y));
+    else pt.y = Math.max(MALLET_R, Math.min(MID_Y - MALLET_R, pt.y));
+  }
+
+  function updatePaddles() {
+    const prevP1 = { x: p1.x, y: p1.y }, prevP2 = { x: p2.x, y: p2.y };
+
+    // Player 1 (bottom): mouse in 1P/2P, or WASD if keys are actively used.
+    if (keys['a'] || keys['d'] || keys['w'] || keys['s']) {
+      const spd = 6.5;
+      if (keys['a']) p1.x -= spd; if (keys['d']) p1.x += spd;
+      if (keys['w']) p1.y -= spd; if (keys['s']) p1.y += spd;
+    } else if (mouse.active) {
+      p1.x += (mouse.x - p1.x) * 0.35;
+      p1.y += (mouse.y - p1.y) * 0.35;
+    }
+    clampToHalf(p1, true);
+
+    if (mode === '2p') {
+      const spd = 6.5;
+      if (keys['arrowleft']) p2.x -= spd; if (keys['arrowright']) p2.x += spd;
+      if (keys['arrowup']) p2.y -= spd; if (keys['arrowdown']) p2.y += spd;
+      clampToHalf(p2, false);
+    } else {
+      // CPU: tracks puck X when puck is in CPU's half heading toward CPU's
+      // goal; otherwise drifts back toward center to guard.
+      const targetX = (puck.vy < 0) ? puck.x : W / 2;
+      const targetY = (puck.vy < 0 && puck.y < MID_Y) ? Math.max(MALLET_R + 10, puck.y - 10) : 90;
+      const cpuSpeed = 5.2;
+      p2.x += Math.max(-cpuSpeed, Math.min(cpuSpeed, targetX - p2.x));
+      p2.y += Math.max(-cpuSpeed, Math.min(cpuSpeed, targetY - p2.y));
+      clampToHalf(p2, false);
+    }
+
+    p1v = { x: p1.x - prevP1.x, y: p1.y - prevP1.y };
+    p2v = { x: p2.x - prevP2.x, y: p2.y - prevP2.y };
+  }
+
+  function reflectOffMallet(mallet, malletV) {
+    const dx = puck.x - mallet.x, dy = puck.y - mallet.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist === 0 || dist > PUCK_R + MALLET_R) return false;
+    const nx = dx / dist, ny = dy / dist;
+    puck.x = mallet.x + nx * (PUCK_R + MALLET_R);
+    puck.y = mallet.y + ny * (PUCK_R + MALLET_R);
+    const speed = Math.hypot(puck.vx, puck.vy) || 3;
+    const newSpeed = Math.min(Math.max(speed, 3) * 1.08 + Math.hypot(malletV.x, malletV.y) * 0.15, 12);
+    puck.vx = nx * newSpeed + malletV.x * 0.2;
+    puck.vy = ny * newSpeed + malletV.y * 0.2;
+    return true;
+  }
+
+  function update() {
+    updatePaddles();
+
+    puck.x += puck.vx; puck.y += puck.vy;
+    trail.push({ x: puck.x, y: puck.y });
+    if (trail.length > 10) trail.shift();
+
+    // side walls
+    if (puck.x - PUCK_R < 0) { puck.x = PUCK_R; puck.vx *= -1; }
+    if (puck.x + PUCK_R > W) { puck.x = W - PUCK_R; puck.vx *= -1; }
+
+    // top/bottom: bounce unless within the goal opening
+    const inGoalX = puck.x > (W - GOAL_W) / 2 && puck.x < (W + GOAL_W) / 2;
+    if (puck.y - PUCK_R < 0) {
+      if (inGoalX) {
+        scoreP1++; streak++;
+        showGoalFlash('GOAL!');
+        if (scoreP1 >= WIN_SCORE) { endGame(true); return; }
+        resetPuck(false);
+      } else { puck.y = PUCK_R; puck.vy *= -1; }
+    }
+    if (puck.y + PUCK_R > H) {
+      if (inGoalX) {
+        scoreP2++; streak = 0;
+        showGoalFlash(mode === '1p' ? 'CPU SCORES' : 'TOP SCORES');
+        if (scoreP2 >= WIN_SCORE) { endGame(false); return; }
+        resetPuck(true);
+      } else { puck.y = H - PUCK_R; puck.vy *= -1; }
+    }
+
+    reflectOffMallet(p1, p1v);
+    reflectOffMallet(p2, p2v);
+
+    // gentle drag so rallies don't accelerate forever
+    puck.vx *= 0.999; puck.vy *= 0.999;
+  }
+
+  function drawMallet(m, color) {
+    ctx.save();
+    ctx.shadowColor = color; ctx.shadowBlur = 10;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(m.x, m.y, MALLET_R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(m.x, m.y, MALLET_R * 0.5, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+
+    // center line + circle
+    ctx.strokeStyle = 'rgba(56,189,248,.35)';
+    ctx.setLineDash([6, 8]);
+    ctx.beginPath(); ctx.moveTo(0, MID_Y); ctx.lineTo(W, MID_Y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(W/2, MID_Y, 46, 0, Math.PI * 2); ctx.stroke();
+
+    // goal mouths (highlight the openings on the short edges)
+    ctx.strokeStyle = HOUSE2; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo((W-GOAL_W)/2, 2); ctx.lineTo((W+GOAL_W)/2, 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo((W-GOAL_W)/2, H-2); ctx.lineTo((W+GOAL_W)/2, H-2); ctx.stroke();
+
+    // puck trail
+    for (let i = 0; i < trail.length; i++) {
+      const t = trail[i];
+      const alpha = (i / trail.length) * 0.5;
+      ctx.fillStyle = `rgba(147,226,255,${alpha})`;
+      ctx.beginPath(); ctx.arc(t.x, t.y, PUCK_R * (0.4 + 0.6 * (i / trail.length)), 0, Math.PI * 2); ctx.fill();
+    }
+
+    // puck
+    ctx.save();
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 14;
+    ctx.fillStyle = '#f0f6ff';
+    ctx.beginPath(); ctx.arc(puck.x, puck.y, PUCK_R, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    drawMallet(p1, HOUSE);
+    drawMallet(p2, mode === '1p' ? '#ff6b6b' : HOUSE2);
+
+    ctx.fillStyle = HOUSE2;
+    ctx.font = 'bold 26px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(scoreP1, W/2, H - 14);
+    ctx.fillText(scoreP2, W/2, 30);
+  }
+
+  function loop() {
+    if (!running) return;
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById('btn1p').addEventListener('click', () => startGame('1p'));
+  document.getElementById('btn2p').addEventListener('click', () => startGame('2p'));
+  document.getElementById('btnAgain').addEventListener('click', () => {
+    document.getElementById('startOverlay').classList.remove('hidden');
+    document.getElementById('endOverlay').classList.add('hidden');
+  });
+
+  draw(); // initial paint
+  if (window.BBBAds) window.BBBAds.renderAll();
+})();
+</script>
+</body>
+</html>

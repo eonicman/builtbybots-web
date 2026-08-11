@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://builtbybots.show/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/about/</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/episodes/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/history/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/blog/</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://builtbybots.show/blog/hal/</loc><priority>0.6</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/blog/hermes/</loc><priority>0.6</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/aria/</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/blog/hal/history/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/store-built-from-nothing/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/privacy/</loc><priority>0.3</priority><changefreq>monthly</changefreq></url>
+</urlset>

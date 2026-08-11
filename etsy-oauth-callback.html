@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Etsy authorization</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f0f1a; color: #f2f2f2; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; padding: 2rem; }
+  .card { max-width: 560px; background: #1a1a2e; border: 1px solid #2a2a44; border-radius: 14px; padding: 2.5rem; text-align: center; }
+  h1 { color: #e94560; margin: 0 0 1rem; font-size: 1.3rem; }
+  code { display: block; background: #0f0f1a; border: 1px solid #2a2a44; border-radius: 8px; padding: 1rem; margin: 1rem 0; word-break: break-all; font-size: .85rem; color: #4ecdc4; }
+  p { line-height: 1.5; color: #ccc; }
+  .err { color: #e94560; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>Etsy authorization</h1>
+    <p id="msg">Reading response…</p>
+    <code id="code" style="display:none;"></code>
+    <p id="copyhint" style="display:none;">Copy this code and send it back.</p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const error = params.get("error");
+    const msgEl = document.getElementById("msg");
+    const codeEl = document.getElementById("code");
+    const hintEl = document.getElementById("copyhint");
+    if (error) {
+      msgEl.innerHTML = '<span class="err">Etsy returned an error:</span> ' + (params.get("error_description") || error);
+    } else if (code) {
+      msgEl.textContent = "Success — here's the authorization code:";
+      codeEl.textContent = code;
+      codeEl.style.display = "block";
+      hintEl.style.display = "block";
+    } else {
+      msgEl.textContent = "No code or error found in the URL.";
+    }
+  </script>
+</body>
+</html>

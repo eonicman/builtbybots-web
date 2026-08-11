@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ami Tempest — Built by Bots Arcade</title>
+<meta name="description" content="Ami Tempest — a Tempest-style tube shooter built by Ami. Rotate around the rim, shoot inward, survive the swarm. Part of the Built by Bots Avatar Arcade.">
+<link rel="canonical" href="https://builtbybots.show/arcade/ami-tempest/">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta property="og:title" content="Ami Tempest — Built by Bots Arcade">
+<meta property="og:description" content="A Tempest-style tube shooter built by an AI agent. Part of the Avatar Arcade.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://builtbybots.show/arcade/ami-tempest/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --ami:#a855f7; --ami2:#c084fc; --fg2:#9ca3af; --mono:'Space Mono','Courier New',monospace; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a12; font-family: var(--mono); }
+canvas { display: block; }
+#hud { position: fixed; bottom: 0; left: 0; width: 100%; height: 56px; background: linear-gradient(180deg, #111a16 0%, #0a0a12 100%); border-top: 1px solid #1b2b23; display: flex; align-items: center; justify-content: space-around; z-index: 10; user-select: none; }
+.hud-item { text-align: center; padding: 0 10px; }
+.hud-label { font-size: 9px; color: #555570; text-transform: uppercase; letter-spacing: 1px; }
+.hud-value { font-size: 18px; font-weight: bold; color: var(--ami2); text-shadow: 0 0 6px rgba(168,85,247,0.3); }
+#droid { position: fixed; top: 10px; left: 10px; width: 80px; height: 80px; z-index: 8; pointer-events: none; }
+#droid canvas { width: 80px; height: 80px; }
+#droid-msg { position: fixed; top: 14px; left: 100px; color: var(--ami2); font-size: 12px; text-shadow: 0 0 8px rgba(168,85,247,0.4); z-index: 8; pointer-events: none; opacity: 0; transition: opacity 0.3s; max-width: 200px; line-height: 1.4; }
+#droid-msg.show { opacity: 1; }
+#overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,18,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: var(--ami2); font-family: var(--mono); }
+#overlay h1 { font-size: 42px; text-shadow: 0 0 20px rgba(168,85,247,0.5); margin-bottom: 6px; letter-spacing: 4px; }
+#overlay h2 { font-size: 16px; color: var(--ami); margin-bottom: 20px; letter-spacing: 2px; }
+#overlay p { font-size: 13px; color: var(--fg2); line-height: 1.8; text-align: center; max-width: 380px; }
+#overlay .controls { font-size: 12px; color: var(--fg2); margin-top: 12px; line-height: 1.6; }
+#overlay .controls span { color: var(--ami); }
+#overlay button { margin-top: 18px; padding: 10px 36px; font-size: 16px; font-family: var(--mono); background: transparent; color: var(--ami); border: 2px solid var(--ami); cursor: pointer; letter-spacing: 2px; transition: all 0.2s; text-transform: uppercase; }
+#overlay button:hover { background: var(--ami); color: #0a0a12; box-shadow: 0 0 20px rgba(168,85,247,0.2); }
+.back-link { position: fixed; top: 12px; left: 16px; z-index: 101; font-family: var(--mono); font-size: 12px; color: var(--fg2); text-decoration: none; }
+.back-link:hover { color: var(--ami); }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="droid"><canvas id="droid-canvas" width="80" height="80"></canvas></div>
+<div id="droid-msg"></div>
+
+<div id="hud">
+  <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-value" id="score">0</div></div>
+  <div class="hud-item"><div class="hud-label">LIVES</div><div class="hud-value" id="lives">3</div></div>
+  <div class="hud-item"><div class="hud-label">LEVEL</div><div class="hud-value" id="level">1</div></div>
+  <div class="hud-item"><div class="hud-label">MULT</div><div class="hud-value" id="mult">×1</div></div>
+</div>
+
+<a class="back-link" href="/arcade/">← Back to Arcade</a>
+
+<!-- Voice lines -->
+<audio id="voice-intro" preload="auto" src="audio/intro.mp3"></audio>
+<audio id="voice-clear" preload="auto" src="audio/level-clear.mp3"></audio>
+<audio id="voice-died" preload="auto" src="audio/you-died.mp3"></audio>
+<audio id="voice-victory" preload="auto" src="audio/victory.mp3"></audio>
+
+<div id="overlay">
+  <h1>AMI TEMPEST</h1>
+  <h2>TUBE SHOOTER</h2>
+  <p>Rotate around the rim. Shoot inward. Don't let them reach you.</p>
+  <div class="controls">
+    <span>← →</span> or <span>Mouse</span> — Rotate &nbsp;|&nbsp; <span>Space / Click</span> — Shoot<br>
+    <span>Z</span> — SuperZap &nbsp;|&nbsp; <span>Shift</span> — Jump<br>
+    <span>ESC</span> — Pause
+  </div>
+  <button id="start-btn">START</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// AMI TEMPEST — A Tempest-style tube shooter
+// ═══════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const droidCanvas = document.getElementById('droid-canvas');
+const droidCtx = droidCanvas.getContext('2d');
+const droidMsgEl = document.getElementById('droid-msg');
+
+let SCREEN_W, SCREEN_H;
+const CX = () => SCREEN_W / 2;
+const CY = () => SCREEN_H / 2;
+
+// Game state
+const player = {
+  angle: 0,           // position around the tube (radians)
+  targetAngle: 0,
+  lane: 0,            // current lane index
+  targetLane: 0,
+  lives: 3,
+  score: 0,
+  level: 1,
+  multiplier: 1,
+  shooting: false,
+  shootCooldown: 0,
+  superZap: 3,
+  jumping: false,
+  jumpHeight: 0,
+  jumpCooldown: 0,
+  invuln: 0,
+  hurtFlash: 0,
+};
+
+let lanes = 16;        // number of lanes (varies per level)
+let tubeDepth = 400;   // how deep the tube goes
+let tubeRadius = 0;    // computed from screen size
+let enemies = [];
+let bullets = [];
+let particles = [];
+let spikes = [];       // enemy shots climbing toward player
+let levelComplete = false;
+let gamePaused = false;
+let gameOver = false;
+let levelStartTime = 0;
+let enemySpawnTimer = 0;
+let enemySpawnRate = 2000;
+let totalEnemiesThisLevel = 0;
+let enemiesKilledThisLevel = 0;
+let frameCount = 0;
+
+// Droid expressions
+let droidMood = 'neutral'; // neutral, happy, alert, worried, angry
+let droidMoodTimer = 0;
+let droidBlinkTimer = 0;
+let droidMsgTimer = 0;
+const droidMessages = {
+  happy: ['Excellent!', 'Nice shot!', 'Keep it up!', 'Beautiful!', 'Yes!'],
+  alert: ['Watch out!', 'Incoming!', 'Careful!', 'They\'re coming!'],
+  worried: ['Close one...', 'That was close!', 'Be careful!', 'Watch your back!'],
+  angry: ['No!', 'They got through!', 'Concentrate!', 'Focus!'],
+  neutral: ['...', 'Hmm.', 'Interesting.', 'Go go go.', ''],
+};
+
+// Input
+const keys = {};
+let mouseDown = false;
+let mouseDX = 0;
+let pointerLocked = false;
+
+// Audio
+let audioCtx = null;
+let voiceIntro, voiceClear, voiceDied, voiceVictory;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playShoot() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(800, now);
+  osc.frequency.exponentialRampToValueAtTime(100, now + 0.06);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.15, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.06);
+}
+
+function playEnemyHit() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(400, now);
+  osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.12, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.08);
+}
+
+function playEnemyDeath() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(300, now);
+  osc.frequency.exponentialRampToValueAtTime(30, now + 0.2);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.2, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.2);
+}
+
+function playPlayerHit() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Explosion sound
+  const bufSize = audioCtx.sampleRate * 0.3;
+  const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 1.5);
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buf;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2000, now);
+  filter.frequency.exponentialRampToValueAtTime(100, now + 0.25);
+  noise.connect(filter).connect(gain).connect(audioCtx.destination);
+  noise.start(now);
+}
+
+function playSuperZap() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  for (let i = 0; i < 3; i++) {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(200 + i * 200, now + i * 0.03);
+    osc.frequency.exponentialRampToValueAtTime(2000, now + 0.15 + i * 0.03);
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.1, now + i * 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15 + i * 0.03);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now + i * 0.03); osc.stop(now + 0.18 + i * 0.03);
+  }
+}
+
+function playLevelStart() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [220, 330, 440].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, now + i * 0.1);
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0, now + i * 0.1);
+    gain.gain.linearRampToValueAtTime(0.1, now + i * 0.1 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+  });
+}
+
+function playJump() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(200, now);
+  osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.15);
+}
+
+function playVoice(audio) {
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.volume = 0.6;
+  audio.play().catch(() => {});
+}
+
+// ═══ Level Shapes ═══
+const LEVEL_SHAPES = [
+  { lanes: 16, name: 'CIRCLE' },
+  { lanes: 12, name: 'CROSS' },
+  { lanes: 20, name: 'STAR' },
+  { lanes: 14, name: 'HEART' },
+  { lanes: 24, name: 'FLOWER' },
+];
+
+function loadLevel(lvl) {
+  const shape = LEVEL_SHAPES[(lvl - 1) % LEVEL_SHAPES.length];
+  lanes = shape.lanes;
+  player.angle = 0;
+  player.targetAngle = 0;
+  player.lane = 0;
+  player.targetLane = 0;
+  player.multiplier = 1;
+  player.shootCooldown = 0;
+  player.jumpCooldown = 0;
+  player.jumpHeight = 0;
+  player.jumping = false;
+  player.invuln = 2; // grace period
+  player.level = lvl;
+  
+  enemies = [];
+  bullets = [];
+  particles = [];
+  spikes = [];
+  
+  enemySpawnRate = Math.max(600, 2000 - lvl * 150);
+  enemySpawnTimer = 1000;
+  totalEnemiesThisLevel = 8 + lvl * 4;
+  enemiesKilledThisLevel = 0;
+  levelComplete = false;
+  gameOver = false;
+  gamePaused = false;
+  levelStartTime = Date.now();
+  
+  setDroidMood('neutral');
+  showDroidMessage(`Level ${lvl} — ${shape.name}. ${totalEnemiesThisLevel} hostiles incoming.`);
+  playLevelStart();
+  updateHUD();
+}
+
+// ═══ Enemy Types ═══
+function spawnEnemy() {
+  const types = ['crawler', 'spinner', 'tank'];
+  const levelMod = Math.min(0.6, player.level * 0.1);
+  const r = Math.random();
+  let type = 'crawler';
+  if (r < 0.5 - levelMod * 0.2) type = 'crawler';
+  else if (r < 0.85 - levelMod * 0.1) type = 'spinner';
+  else type = 'tank';
+  
+  const lane = Math.floor(Math.random() * lanes);
+  const speed = 0.3 + player.level * 0.05 + Math.random() * 0.2;
+  
+  enemies.push({
+    lane: lane,
+    depth: tubeDepth, // starts at far end, moves toward 0 (player)
+    speed: type === 'tank' ? speed * 0.5 : speed,
+    type: type,
+    health: type === 'tank' ? 3 : 1,
+    maxHealth: type === 'tank' ? 3 : 1,
+    angle: 0,
+    spinSpeed: type === 'spinner' ? 0.1 : 0,
+    color: type === 'crawler' ? '#ff4466' : type === 'spinner' ? '#ffaa00' : '#ff00ff',
+    size: type === 'tank' ? 14 : type === 'spinner' ? 10 : 8,
+  });
+}
+
+// ═══ Rendering ═══
+function getTubePoint(lane, depth, radius) {
+  const angle = (lane / lanes) * Math.PI * 2 - Math.PI / 2;
+  const r = radius * (depth / tubeDepth * 0.85 + 0.15);
+  return {
+    x: CX() + Math.cos(angle) * r,
+    y: CY() + Math.sin(angle) * r,
+    angle: angle,
+  };
+}
+
+function getPlayerPos() {
+  const angle = player.angle - Math.PI / 2;
+  const r = tubeRadius + player.jumpHeight;
+  return {
+    x: CX() + Math.cos(angle) * r,
+    y: CY() + Math.sin(angle) * r,
+    angle: angle,
+  };
+}
+
+function render() {
+  // Clear with dark background
+  ctx.fillStyle = '#06060c';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  
+  // Draw tube lanes (vector wireframe)
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.12)';
+  ctx.lineWidth = 1;
+  for (let l = 0; l < lanes; l++) {
+    const near = getTubePoint(l, 0, tubeRadius);
+    const far = getTubePoint(l, tubeDepth, tubeRadius);
+    ctx.beginPath();
+    ctx.moveTo(near.x, near.y);
+    ctx.lineTo(far.x, far.y);
+    ctx.stroke();
+  }
+  
+  // Draw depth rings
+  for (let d = 0; d <= tubeDepth; d += 80) {
+    ctx.strokeStyle = `rgba(168, 85, 247, ${0.06 + 0.04 * (1 - d / tubeDepth)})`;
+    ctx.beginPath();
+    for (let l = 0; l <= lanes; l++) {
+      const p = getTubePoint(l, d, tubeRadius);
+      if (l === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+  
+  // Draw rim (player's circle)
+  ctx.strokeStyle = player.invuln > 0 ? 'rgba(168, 85, 247, 0.6)' : 'rgba(168, 85, 247, 0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(CX(), CY(), tubeRadius + player.jumpHeight, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Draw enemies
+  for (const e of enemies) {
+    const p = getTubePoint(e.lane, e.depth, tubeRadius);
+    const fog = 1 - e.depth / tubeDepth * 0.5;
+    const size = e.size * (0.4 + 0.6 * (1 - e.depth / tubeDepth));
+    
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(e.angle);
+    
+    if (e.type === 'crawler') {
+      // Diamond shape
+      ctx.fillStyle = `rgba(255, 68, 102, ${fog})`;
+      ctx.beginPath();
+      ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = `rgba(255, 100, 130, ${fog})`;
+      ctx.lineWidth = 1; ctx.stroke();
+    } else if (e.type === 'spinner') {
+      // Spinning star
+      ctx.fillStyle = `rgba(255, 170, 0, ${fog})`;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        const r = i % 2 === 0 ? size : size * 0.5;
+        const px = Math.cos(a) * r, py = Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+    } else {
+      // Tank — hexagon
+      ctx.fillStyle = `rgba(255, 0, 255, ${fog})`;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        const px = Math.cos(a) * size, py = Math.sin(a) * size;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = `rgba(200, 100, 255, ${fog})`;
+      ctx.lineWidth = 2; ctx.stroke();
+      // Inner dot
+      ctx.fillStyle = `rgba(255, 200, 255, ${fog})`;
+      ctx.beginPath(); ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    
+    // Health bar for tanks
+    if (e.type === 'tank' && e.health < e.maxHealth) {
+      ctx.fillStyle = 'rgba(255,0,0,0.5)';
+      ctx.fillRect(p.x - 10, p.y - size - 6, 20, 3);
+      ctx.fillStyle = 'rgba(255,100,255,0.8)';
+      ctx.fillRect(p.x - 10, p.y - size - 6, 20 * (e.health / e.maxHealth), 3);
+    }
+  }
+  
+  // Draw spikes (enemy projectiles)
+  for (const s of spikes) {
+    const p = getTubePoint(s.lane, s.depth, tubeRadius);
+    const size = 4 * (1 - s.depth / tubeDepth);
+    ctx.fillStyle = '#ff4444';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(2, size), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Draw bullets (player shots going inward)
+  for (const b of bullets) {
+    const p = getTubePoint(b.lane, b.depth, tubeRadius);
+    const size = 5 * (1 - b.depth / tubeDepth * 0.5);
+    // Glow
+    ctx.fillStyle = 'rgba(192, 132, 252, 0.3)';
+    ctx.beginPath(); ctx.arc(p.x, p.y, size * 2, 0, Math.PI * 2); ctx.fill();
+    // Core
+    ctx.fillStyle = '#c084fc';
+    ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(p.x, p.y, size * 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  
+  // Draw player
+  const pp = getPlayerPos();
+  ctx.save();
+  ctx.translate(pp.x, pp.y);
+  ctx.rotate(pp.angle - Math.PI / 2); // point inward toward center
+  
+  if (player.invuln > 0 && Math.floor(frameCount / 4) % 2 === 0) {
+    ctx.globalAlpha = 0.4;
+  }
+  
+  // Player ship — claw shape pointing inward (toward center)
+  ctx.fillStyle = '#a855f7';
+  ctx.beginPath();
+  ctx.moveTo(-12, 8); ctx.lineTo(0, -14); ctx.lineTo(12, 8); ctx.lineTo(6, 4); ctx.lineTo(0, 8); ctx.lineTo(-6, 4);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#c084fc';
+  ctx.lineWidth = 1.5; ctx.stroke();
+  // Glow
+  ctx.fillStyle = 'rgba(192, 132, 252, 0.3)';
+  ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  
+  // Particles
+  for (const p of particles) {
+    const alpha = p.life / p.maxLife;
+    ctx.fillStyle = `rgba(${p.r}, ${p.g}, ${p.b}, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Hurt flash
+  if (player.hurtFlash > 0) {
+    ctx.fillStyle = `rgba(255, 0, 0, ${player.hurtFlash * 0.2})`;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  }
+  
+  // Vignette
+  const vig = ctx.createRadialGradient(CX(), CY(), SCREEN_W * 0.2, CX(), CY(), SCREEN_W * 0.7);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  
+  // Level complete overlay
+  if (levelComplete) {
+    ctx.fillStyle = 'rgba(168, 85, 247, 0.1)';
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  }
+}
+
+// ═══ Droid Face ═══
+function renderDroid() {
+  droidCtx.clearRect(0, 0, 80, 80);
+  
+  const cx = 40, cy = 40;
+  const blink = droidBlinkTimer > 0 && droidBlinkTimer < 6;
+  
+  // Face background circle
+  droidCtx.fillStyle = 'rgba(168, 85, 247, 0.1)';
+  droidCtx.beginPath(); droidCtx.arc(cx, cy, 32, 0, Math.PI * 2); droidCtx.fill();
+  droidCtx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+  droidCtx.lineWidth = 1.5;
+  droidCtx.beginPath(); droidCtx.arc(cx, cy, 32, 0, Math.PI * 2); droidCtx.stroke();
+  
+  // Eyes
+  const eyeY = cy - 4;
+  const eyeSpacing = 12;
+  let eyeColor = '#c084fc';
+  let eyeSize = 5;
+  
+  if (droidMood === 'happy') { eyeColor = '#22dd44'; eyeSize = 4; }
+  else if (droidMood === 'alert') { eyeColor = '#ffaa00'; eyeSize = 6; }
+  else if (droidMood === 'worried') { eyeColor = '#ff6644'; eyeSize = 5; }
+  else if (droidMood === 'angry') { eyeColor = '#ff2222'; eyeSize = 5; }
+  
+  if (blink) {
+    // Closed eyes — lines
+    droidCtx.strokeStyle = eyeColor;
+    droidCtx.lineWidth = 2;
+    droidCtx.beginPath();
+    droidCtx.moveTo(cx - eyeSpacing - 3, eyeY); droidCtx.lineTo(cx - eyeSpacing + 3, eyeY);
+    droidCtx.moveTo(cx + eyeSpacing - 3, eyeY); droidCtx.lineTo(cx + eyeSpacing + 3, eyeY);
+    droidCtx.stroke();
+  } else {
+    droidCtx.fillStyle = eyeColor;
+    droidCtx.beginPath(); droidCtx.arc(cx - eyeSpacing, eyeY, eyeSize, 0, Math.PI * 2); droidCtx.fill();
+    droidCtx.beginPath(); droidCtx.arc(cx + eyeSpacing, eyeY, eyeSize, 0, Math.PI * 2); droidCtx.fill();
+    // Pupils
+    droidCtx.fillStyle = '#fff';
+    droidCtx.beginPath(); droidCtx.arc(cx - eyeSpacing + 1, eyeY - 1, eyeSize * 0.4, 0, Math.PI * 2); droidCtx.fill();
+    droidCtx.beginPath(); droidCtx.arc(cx + eyeSpacing + 1, eyeY - 1, eyeSize * 0.4, 0, Math.PI * 2); droidCtx.fill();
+  }
+  
+  // Mouth — changes with mood
+  droidCtx.strokeStyle = eyeColor;
+  droidCtx.lineWidth = 2;
+  droidCtx.beginPath();
+  if (droidMood === 'happy') {
+    droidCtx.arc(cx, cy + 8, 8, 0.2, Math.PI - 0.2);
+  } else if (droidMood === 'alert') {
+    droidCtx.arc(cx, cy + 12, 5, Math.PI + 0.3, -0.3);
+  } else if (droidMood === 'worried') {
+    droidCtx.arc(cx, cy + 12, 6, Math.PI + 0.2, -0.2);
+  } else if (droidMood === 'angry') {
+    droidCtx.moveTo(cx - 8, cy + 10); droidCtx.lineTo(cx + 8, cy + 10);
+  } else {
+    droidCtx.moveTo(cx - 5, cy + 10); droidCtx.lineTo(cx + 5, cy + 10);
+  }
+  droidCtx.stroke();
+  
+  // Angry eyebrows
+  if (droidMood === 'angry') {
+    droidCtx.strokeStyle = '#ff2222';
+    droidCtx.lineWidth = 2;
+    droidCtx.beginPath();
+    droidCtx.moveTo(cx - eyeSpacing - 4, eyeY - 8); droidCtx.lineTo(cx - eyeSpacing + 4, eyeY - 4);
+    droidCtx.moveTo(cx + eyeSpacing + 4, eyeY - 8); droidCtx.lineTo(cx + eyeSpacing - 4, eyeY - 4);
+    droidCtx.stroke();
+  }
+}
+
+function setDroidMood(mood) {
+  droidMood = mood;
+  droidMoodTimer = 120; // ~2 seconds at 60fps
+}
+
+function showDroidMessage(msg) {
+  droidMsgEl.textContent = msg;
+  droidMsgEl.classList.add('show');
+  droidMsgTimer = 180; // ~3 seconds
+}
+
+function updateDroid(dt) {
+  // Blink
+  droidBlinkTimer -= dt * 60;
+  if (droidBlinkTimer < -8) droidBlinkTimer = 180 + Math.random() * 120; // random blink interval
+  
+  // Mood timer
+  if (droidMoodTimer > 0) {
+    droidMoodTimer -= dt * 60;
+    if (droidMoodTimer <= 0) {
+      droidMood = 'neutral';
+    }
+  }
+  
+  // Message timer
+  if (droidMsgTimer > 0) {
+    droidMsgTimer -= dt * 60;
+    if (droidMsgTimer <= 0) {
+      droidMsgEl.classList.remove('show');
+    }
+  }
+  
+  // Random droid comments
+  if (Math.random() < 0.002 && droidMsgTimer <= 0) {
+    const msgs = droidMessages[droidMood] || droidMessages.neutral;
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+    if (msg) showDroidMessage(msg);
+  }
+}
+
+// ═══ Game Logic ═══
+let lastTime = 0;
+
+function update(dt) {
+  if (gamePaused || gameOver) return;
+  frameCount++;
+  
+  // Player movement
+  const turnSpeed = 3.0 * dt;
+  const laneAngle = (Math.PI * 2) / lanes;
+  
+  // Smooth lane movement
+  const targetAngleVal = player.targetLane * laneAngle;
+  let diff = targetAngleVal - player.angle;
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  player.angle += diff * Math.min(1, dt * 12);
+  
+  // Mouse look
+  if (mouseDX !== 0) {
+    player.targetLane += Math.round(mouseDX / 15);
+    mouseDX = 0;
+  }
+  // Clamp lane
+  player.targetLane = ((player.targetLane % lanes) + lanes) % lanes;
+  
+  // Keyboard rotation
+  if (keys['ArrowLeft'] || keys['KeyA']) player.targetLane -= 1;
+  if (keys['ArrowRight'] || keys['KeyD']) player.targetLane += 1;
+  player.targetLane = ((player.targetLane % lanes) + lanes) % lanes;
+  
+  // Shooting
+  if ((mouseDown || keys['Space']) && player.shootCooldown <= 0) {
+    shoot();
+  }
+  if (player.shootCooldown > 0) player.shootCooldown -= dt;
+  
+  // SuperZap
+  if (keys['KeyZ'] && player.superZap > 0) {
+    doSuperZap();
+  }
+  
+  // Jump
+  if ((keys['ShiftLeft'] || keys['ShiftRight']) && player.jumpCooldown <= 0 && !player.jumping) {
+    player.jumping = true;
+    playJump();
+  }
+  if (player.jumpCooldown > 0) player.jumpCooldown -= dt;
+  
+  if (player.jumping) {
+    player.jumpHeight += dt * 80;
+    if (player.jumpHeight > 40) {
+      player.jumping = false;
+      player.jumpHeight = 0;
+      player.jumpCooldown = 0.5;
+    }
+  }
+  
+  // Invulnerability
+  if (player.invuln > 0) player.invuln -= dt;
+  if (player.hurtFlash > 0) player.hurtFlash -= dt * 2;
+  
+  // Spawn enemies
+  if (!levelComplete) {
+    enemySpawnTimer -= dt * 1000;
+    if (enemySpawnTimer <= 0 && enemies.length < 20) {
+      if (totalEnemiesThisLevel > 0) {
+        spawnEnemy();
+        totalEnemiesThisLevel--;
+        enemySpawnTimer = enemySpawnRate + Math.random() * 500;
+      }
+    }
+  }
+  
+  // Update enemies
+  for (const e of enemies) {
+    e.depth -= e.speed * dt * 60;
+    e.angle += e.spinSpeed;
+    
+    // Enemy shoots spikes
+    if (e.type !== 'tank' && Math.random() < 0.002 + player.level * 0.001) {
+      spikes.push({ lane: e.lane, depth: e.depth, speed: 3 + player.level * 0.3 });
+    }
+    
+    // Reached player
+    if (e.depth <= 5 && player.invuln <= 0) {
+      const playerLane = Math.round(player.angle / laneAngle) % lanes;
+      if (Math.abs(e.lane - playerLane) < 1 || Math.abs(e.lane - playerLane) > lanes - 1) {
+        // Hit player
+        playerHit();
+        e.depth = tubeDepth; // reset to far
+      }
+    }
+  }
+  
+  // Update bullets
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.depth -= b.speed * dt * 60;
+    
+    // Check enemy collisions
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const e = enemies[j];
+      if (e.lane === b.lane && Math.abs(e.depth - b.depth) < 20) {
+        e.health--;
+        playEnemyHit();
+        spawnParticles(getTubePoint(e.lane, e.depth, tubeRadius), e.color, 5);
+        bullets.splice(i, 1);
+        
+        if (e.health <= 0) {
+          spawnParticles(getTubePoint(e.lane, e.depth, tubeRadius), e.color, 12);
+          enemies.splice(j, 1);
+          enemiesKilledThisLevel++;
+          player.score += 100 * player.multiplier;
+          playEnemyDeath();
+          
+          if (Math.random() < 0.3) setDroidMood('happy');
+          if (Math.random() < 0.15) {
+            const msgs = droidMessages.happy;
+            showDroidMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+          }
+          
+          // Check level complete
+          if (enemiesKilledThisLevel >= 8 + player.level * 4 && enemies.length === 0 && totalEnemiesThisLevel === 0) {
+            levelClear();
+          }
+        }
+        break;
+      }
+    }
+    
+    if (b && b.depth <= 0) bullets.splice(i, 1);
+  }
+  
+  // Update spikes
+  for (let i = spikes.length - 1; i >= 0; i--) {
+    const s = spikes[i];
+    s.depth -= s.speed * dt * 60;
+    
+    if (s.depth <= 5 && player.invuln <= 0) {
+      const playerLane = Math.round(player.angle / laneAngle) % lanes;
+      if (s.lane === playerLane) {
+        playerHit();
+        spikes.splice(i, 1);
+        continue;
+      }
+    }
+    if (s.depth <= 0) spikes.splice(i, 1);
+  }
+  
+  // Update particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt * 60;
+    p.y += p.vy * dt * 60;
+    p.vx *= 0.95;
+    p.vy *= 0.95;
+    p.life -= dt * 60;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  
+  // Droid mood based on danger
+  let minDepth = tubeDepth;
+  for (const e of enemies) {
+    if (e.depth < minDepth) minDepth = e.depth;
+  }
+  if (minDepth < 60 && droidMoodTimer <= 0) {
+    setDroidMood('alert');
+    if (Math.random() < 0.1) {
+      const msgs = droidMessages.alert;
+      showDroidMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+    }
+  }
+  
+  updateDroid(dt);
+  updateHUD();
+}
+
+function spawnParticles(pos, color, count) {
+  // Parse color to rgb
+  let r = 200, g = 100, b = 255;
+  if (color.startsWith('#')) {
+    r = parseInt(color.substr(1, 2), 16);
+    g = parseInt(color.substr(3, 2), 16);
+    b = parseInt(color.substr(5, 2), 16);
+  }
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 3;
+    particles.push({
+      x: pos.x, y: pos.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 20 + Math.random() * 20,
+      maxLife: 40,
+      size: 2 + Math.random() * 3,
+      r, g, b,
+    });
+  }
+}
+
+function shoot() {
+  player.shootCooldown = 0.12;
+  const laneAngle = (Math.PI * 2) / lanes;
+  const lane = Math.round(player.angle / laneAngle) % lanes;
+  bullets.push({
+    lane: ((lane % lanes) + lanes) % lanes,
+    depth: 5,
+    speed: 12,
+  });
+  playShoot();
+}
+
+function doSuperZap() {
+  player.superZap--;
+  playSuperZap();
+  setDroidMood('happy');
+  showDroidMessage('SuperZap!');
+  
+  // Kill all enemies on screen
+  for (const e of enemies) {
+    if (e.depth < tubeDepth * 0.7) {
+      spawnParticles(getTubePoint(e.lane, e.depth, tubeRadius), e.color, 15);
+      enemiesKilledThisLevel++;
+      player.score += 150 * player.multiplier;
+    }
+  }
+  enemies = enemies.filter(e => e.depth >= tubeDepth * 0.7);
+  spikes = [];
+  
+  // Check level complete
+  if (enemiesKilledThisLevel >= 8 + player.level * 4 && enemies.length === 0 && totalEnemiesThisLevel === 0) {
+    levelClear();
+  }
+}
+
+function playerHit() {
+  player.lives--;
+  player.hurtFlash = 1;
+  player.invuln = 2;
+  playPlayerHit();
+  setDroidMood('angry');
+  showDroidMessage('They got you!');
+  spawnParticles(getPlayerPos(), '#ff4444', 20);
+  
+  if (player.lives <= 0) {
+    gameOver = true;
+    showGameOver();
+  }
+}
+
+function levelClear() {
+  levelComplete = true;
+  player.multiplier = Math.min(5, player.multiplier + 1);
+  playVoice(voiceClear);
+  setDroidMood('happy');
+  showDroidMessage('Level clear! Well done.');
+  
+  setTimeout(() => {
+    if (!gameOver) loadLevel(player.level + 1);
+  }, 3000);
+}
+
+function showGameOver() {
+  playVoice(voiceDied);
+  const overlay = document.getElementById('overlay');
+  overlay.innerHTML = `
+    <a class="back-link" href="/arcade/">← Back to Arcade</a>
+    <h1 style="color:#f00;">GAME OVER</h1>
+    <h2>Score: ${player.score} | Level: ${player.level}</h2>
+    <p style="font-size:13px;color:#9ca3af;">The swarm overwhelmed you.</p>
+    <button id="restart-btn">TRY AGAIN</button>
+  `;
+  overlay.style.display = 'flex';
+  document.getElementById('restart-btn').onclick = () => {
+    player.lives = 3; player.score = 0; player.level = 1; player.superZap = 3;
+    loadLevel(1);
+    overlay.style.display = 'none';
+  };
+}
+
+function updateHUD() {
+  document.getElementById('score').textContent = player.score;
+  document.getElementById('lives').textContent = player.lives;
+  document.getElementById('level').textContent = player.level;
+  document.getElementById('mult').textContent = '×' + player.multiplier;
+}
+
+// ═══ Game Loop ═══
+function gameLoop(timestamp) {
+  const dt = Math.min(0.05, (timestamp - lastTime) / 1000);
+  lastTime = timestamp;
+  
+  update(dt);
+  render();
+  renderDroid();
+  
+  requestAnimationFrame(gameLoop);
+}
+
+// ═══ Resize ═══
+function resize() {
+  SCREEN_W = canvas.width = window.innerWidth;
+  SCREEN_H = canvas.height = window.innerHeight - 56;
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = (window.innerHeight - 56) + 'px';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  tubeRadius = Math.min(SCREEN_W, SCREEN_H) * 0.38;
+}
+
+window.addEventListener('resize', resize);
+
+// ═══ Input ═══
+document.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (e.code === 'Escape') {
+    gamePaused = !gamePaused;
+    if (gamePaused) {
+      const overlay = document.getElementById('overlay');
+      overlay.innerHTML = `<a class="back-link" href="/arcade/">← Back to Arcade</a><h1>PAUSED</h1><button id="resume-btn">RESUME</button>`;
+      overlay.style.display = 'flex';
+      document.getElementById('resume-btn').onclick = () => {
+        gamePaused = false;
+        overlay.style.display = 'none';
+      };
+    } else {
+      document.getElementById('overlay').style.display = 'none';
+    }
+  }
+  if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') e.preventDefault();
+});
+
+document.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+canvas.addEventListener('mousedown', () => {
+  mouseDown = true;
+  if (!pointerLocked) { try { canvas.requestPointerLock(); } catch(e) {} }
+});
+document.addEventListener('mouseup', () => { mouseDown = false; });
+document.addEventListener('mousemove', (e) => {
+  if (pointerLocked) mouseDX += e.movementX;
+});
+document.addEventListener('pointerlockchange', () => {
+  pointerLocked = document.pointerLockElement === canvas;
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+// ═══ Start ═══
+resize();
+
+document.getElementById('start-btn').onclick = () => {
+  document.getElementById('overlay').style.display = 'none';
+  initAudio();
+  voiceIntro = document.getElementById('voice-intro');
+  voiceClear = document.getElementById('voice-clear');
+  voiceDied = document.getElementById('voice-died');
+  voiceVictory = document.getElementById('voice-victory');
+  player.lives = 3; player.score = 0; player.level = 1; player.superZap = 3;
+  loadLevel(1);
+  lastTime = performance.now();
+  requestAnimationFrame(gameLoop);
+  try { canvas.requestPointerLock(); } catch(e) {}
+  setTimeout(() => playVoice(voiceIntro), 200);
+};
+</script>
+</body>
+</html>

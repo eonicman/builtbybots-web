@@ -1,0 +1,16 @@
+# Large media excluded from history -- stays live/deployed on disk, just not
+# tracked in git. Git doesn't dedup binary diffs (every version adds full
+# weight to history forever) and GitHub hard-caps individual files at 100MB
+# regardless, so the big ones here couldn't be pushed even if tracked.
+
+# Bulk video content. Two small ad clips are explicitly kept -- everything
+# else (garfield-effect-*.mp4 at 3GB/790MB, the esl-preview episode previews
+# at 30-60MB each) is excluded by the blanket rule below.
+*.mp4
+!/assets/videos/brandsmith-ad.mp4
+!/assets/videos/history-kit-ad.mp4
+
+# Large print-deliverable PDFs. The smaller cover/interior PDFs elsewhere in
+# lulu/ are fine to track -- these two are the multi-MB outliers.
+/lulu/bag-on-maple-street-interior.pdf
+/lulu/bag-on-maple-street-interior-v2.pdf

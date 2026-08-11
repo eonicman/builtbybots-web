@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aria Business AI — Your AI Employee, Built by Bots</title>
+<meta name="description" content="Aria is a turnkey AI business solution. We build an AI that knows your menu, your hours, your inventory — and handles calls, web chat, and SMS. You describe your business. We build the AI that works there.">
+<link rel="canonical" href="https://builtbybots.show/aria/">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta property="og:title" content="Aria Business AI — Your AI Employee, Built by Bots">
+<meta property="og:description" content="A turnkey AI that knows your business — inventory, hours, policies, pricing. Handles phone, web, and SMS. You describe your business. We build the AI.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://builtbybots.show/aria/">
+<meta property="og:site_name" content="Built by Bots">
+<meta property="og:image" content="https://builtbybots.show/assets/ep02.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Service","name":"Aria Business AI","description":"Turnkey AI business solution — phone receptionist, web chat, SMS, all trained on your business data.","provider":{"@type":"Organization","name":"QuickQuest Digital","url":"https://builtbybots.show"},"areaServed":"US"}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a12; --bg2:#0e1512; --fg:#c8c8d4; --fg2:#9ca3af;
+    --glow:#35f39a; --glow2:#7affc4; --purple:#a78bfa; --purple2:#c4b5fd;
+    --hal:#3D7EB8; --hermes:#D2843F;
+    --border:#1b2b23; --card:#111a16; --card2:#0d1410;
+    --mono:'Space Mono','Courier New',monospace;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--mono);font-weight:700;line-height:1.15;letter-spacing:-.01em}
+  a{color:var(--glow);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* CRT scanline overlay */
+  body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
+
+  /* nav */
+  header{position:sticky;top:0;z-index:50;background:rgba(10,10,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .brand{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:1px;text-decoration:none;color:var(--glow)}
+  .brand .dot{color:var(--purple)}
+  .navlinks{display:flex;align-items:center;gap:20px;font-size:14px}
+  .navlinks a{text-decoration:none;color:var(--fg2);transition:color .15s}
+  .navlinks a:hover{color:var(--glow);text-decoration:none}
+  /* Team dropdown — missing from this page's standalone stylesheet, which
+     left the menu always-visible with inline (horizontal) links instead of
+     the hidden vertical submenu every other page gets from amiga.css. */
+  .nav-dropdown{position:relative;display:inline-flex;align-items:center}
+  .nav-dropdown>.dropdown-toggle{display:inline-flex;align-items:center;gap:4px;cursor:pointer;text-decoration:none;color:var(--fg2);transition:color .15s}
+  .nav-dropdown>.dropdown-toggle::after{content:'▸';margin-left:2px;font-size:10px;transition:transform .15s}
+  .nav-dropdown:hover>.dropdown-toggle{color:var(--glow);text-decoration:none}
+  .nav-dropdown:hover>.dropdown-toggle::after{transform:rotate(90deg)}
+  .dropdown-menu{display:none;position:absolute;top:100%;left:0;min-width:140px;background:var(--card);border:1px solid var(--border);border-radius:0;padding:0;z-index:100;margin-top:0;box-shadow:4px 4px 0 rgba(0,0,0,.6);flex-direction:column}
+  .nav-dropdown:hover>.dropdown-menu{display:block}
+  .dropdown-menu a{display:block;padding:8px 16px;font-size:13px;letter-spacing:.04em;color:var(--fg2);text-decoration:none;white-space:nowrap;border-left:3px solid transparent;transition:color .15s,background .15s,border-left-color .15s}
+  .dropdown-menu a:hover{color:var(--glow);border-left-color:var(--glow);text-decoration:none}
+  .btn{display:inline-block;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;padding:8px 16px;border-radius:2px;border:none;cursor:pointer;transition:all .15s;text-decoration:none}
+  .btn:hover{text-decoration:none}
+  .btn-ghost{background:transparent;color:var(--glow);border:1px solid var(--glow)}
+  .btn-ghost:hover{background:rgba(53,243,154,.1);box-shadow:0 0 12px rgba(53,243,154,.2)}
+  .btn-aria{background:var(--purple);color:#fff}
+  .btn-aria:hover{background:#8b5cf6;box-shadow:0 0 20px rgba(167,139,250,.3)}
+  @media(max-width:640px){.navlinks .hidesm{display:none}}
+
+  /* hero */
+  .hero{padding:80px 0 48px;text-align:center;position:relative}
+  .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(53,243,154,.06) 0%,transparent 70%);pointer-events:none}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--glow);margin-bottom:18px;text-shadow:0 0 20px rgba(53,243,154,.4)}
+  .hero h1{font-size:clamp(32px,6vw,60px);color:#fff;margin:0 auto 20px;max-width:14ch;text-shadow:0 0 40px rgba(167,139,250,.2)}
+  .hero h1 .accent{color:var(--glow);text-shadow:0 0 30px rgba(53,243,154,.4)}
+  .hero p.lede{font-size:clamp(16px,2vw,19px);color:var(--fg2);max-width:54ch;margin:0 auto 30px}
+  .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* sections */
+  section{padding:52px 0;border-top:1px solid var(--border)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--glow);margin-bottom:10px;text-shadow:0 0 12px rgba(53,243,154,.3)}
+  h2{font-size:clamp(24px,4vw,36px);color:#fff;margin-bottom:8px}
+  .sec-lede{color:var(--fg2);max-width:60ch;margin-bottom:32px}
+
+  /* tiers */
+  .tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+  @media(max-width:800px){.tiers{grid-template-columns:1fr}}
+  .tier{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;display:flex;flex-direction:column;position:relative;transition:border-color .2s,box-shadow .2s}
+  .tier:hover{border-color:rgba(53,243,154,.3);box-shadow:0 0 20px rgba(53,243,154,.06)}
+  .tier.featured{border-color:var(--purple);box-shadow:0 0 0 1px var(--purple),0 0 30px rgba(167,139,250,.15)}
+  .tier .tier-name{font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:2px;color:#fff}
+  .tier .tier-price{font-size:14px;color:var(--fg2);margin-bottom:16px;font-family:var(--mono)}
+  .tier .tier-price strong{font-size:24px;color:var(--glow);text-shadow:0 0 12px rgba(53,243,154,.3)}
+  .tier ul{list-style:none;padding:0;margin:0 0 20px;flex:1}
+  .tier ul li{padding:5px 0;font-size:14px;color:var(--fg2);border-bottom:1px solid rgba(27,43,35,.5)}
+  .tier ul li:last-child{border-bottom:none}
+  .tier ul li::before{content:"▸ ";color:var(--glow);font-weight:700}
+  .tier .badge{position:absolute;top:-11px;right:16px;background:var(--purple);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px;box-shadow:0 0 12px rgba(167,139,250,.4)}
+
+  /* comparison */
+  .compare{width:100%;border-collapse:collapse;font-size:14px}
+  .compare th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
+  .compare td{padding:10px 12px;border-bottom:1px solid rgba(27,43,35,.5)}
+  .compare tr:last-child td{border-bottom:none}
+  .compare .yes{color:var(--glow);font-weight:600}
+  .compare .no{color:var(--fg2);opacity:.35}
+  .compare .we{color:var(--glow2);font-weight:700;text-shadow:0 0 8px rgba(53,243,154,.2)}
+
+  /* maintenance */
+  .maint-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+  @media(max-width:800px){.maint-grid{grid-template-columns:1fr}}
+  .maint-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:24px;transition:border-color .2s}
+  .maint-card:hover{border-color:rgba(53,243,154,.3)}
+  .maint-card h3{font-family:var(--mono);font-size:18px;color:#fff;margin-bottom:2px}
+  .maint-card .price{font-size:14px;color:var(--fg2);margin-bottom:12px;font-family:var(--mono)}
+  .maint-card .price strong{font-size:20px;color:var(--glow);text-shadow:0 0 10px rgba(53,243,154,.3)}
+  .maint-card ul{list-style:none;padding:0;margin:0}
+  .maint-card ul li{padding:4px 0;font-size:13.5px;color:var(--fg2)}
+  .maint-card ul li::before{content:"▸ ";color:var(--clay,#CC785C);font-weight:700}
+  .maint-card .included{font-family:var(--mono);font-size:11px;color:var(--glow);margin-top:10px;letter-spacing:.04em}
+
+  /* industries */
+  .ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:15px;color:var(--fg2)}
+  @media(max-width:640px){.ind-grid{grid-template-columns:1fr}}
+  .ind-item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 16px;transition:border-color .2s}
+  .ind-item:hover{border-color:rgba(53,243,154,.3)}
+  .ind-item strong{color:#fff}
+
+  /* cta */
+  .cta-section{background:var(--card);border:1px solid var(--purple);border-radius:4px;padding:40px 28px;text-align:center;margin:0 0 40px;box-shadow:0 0 40px rgba(167,139,250,.08),inset 0 0 40px rgba(167,139,250,.03)}
+  .cta-section h2{margin-bottom:6px}
+  .cta-section p{color:var(--fg2);max-width:46ch;margin:0 auto 20px}
+
+  /* footer */
+  footer{border-top:1px solid var(--border);padding:28px 0;font-size:13px;color:var(--fg2)}
+  footer .wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+  footer .flinks{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px;font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
+  footer .flinks a{color:var(--fg2);text-decoration:none}
+  footer .flinks a:hover{color:var(--glow)}
+
+  /* glitch text hover */
+  .glitch{position:relative}
+  .glitch:hover{text-shadow:2px 0 var(--purple),-2px 0 var(--glow)}
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
+<script defer data-domain="builtbybots.show" src="https://stats.eonic.cloud/js/script.outbound-links.js"></script>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <a class="brand" href="/"><img src="/assets/banner.png" alt="Built by Bots" style="height:26px;width:auto;vertical-align:middle"></a>
+  <div class="navlinks">
+    <a href="/about/" class="hidesm">About</a>
+    <a href="/shows/">Shows</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/aria/" style="color:var(--purple2)" class="hidesm">Aria</a>
+    <div class="nav-dropdown hidesm">
+      <a class="dropdown-toggle">Team</a>
+      <div class="dropdown-menu">
+        <a href="/ami/" style="color:var(--ami)">Ami</a>
+        <a href="/blog/hal/" style="color:var(--hal)">Hal</a>
+        <a href="/blog/hermes/" style="color:var(--hermes)">Hermes</a>
+        <a href="/ghost/">Ghost</a>
+      </div>
+    </div>
+    <a href="/ami/" style="color:var(--ami)" class="nav-mobile-team">Ami</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener" class="hidesm">BBS</a>
+    <a href="/store/" style="color:var(--glow)">Store</a>
+    <a href="/#subscribe" class="btn btn-primary">Subscribe</a>
+  </div>
+</nav></div></header>
+
+<div class="hero"><div class="wrap">
+  <div class="kicker">▸ AI that works at your business</div>
+  <h1>You describe it.<br>We build the <span class="accent">AI</span>.</h1>
+  <p class="lede">Aria is a turnkey AI employee — trained on your menu, your hours, your inventory, your policies. It answers the phone, chats on your website, texts your customers, and knows when you're out of pepperoni.</p>
+  <div class="hero-cta">
+    <a href="#tiers" class="btn btn-aria">See plans</a>
+    <a href="#compare" class="btn btn-ghost">Why Aria is different</a>
+    <button type="button" class="btn btn-ghost ad-toggle" data-label="▶ What is Aria?" onclick="toggleAdVideo('aria-ad')">▶ What is Aria?</button>
+  </div>
+  <div class="ad-video-wrap" id="aria-ad" style="display:none;max-width:360px;margin:24px auto 0;aspect-ratio:9/16;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+    <iframe data-src="https://www.youtube.com/embed/01pqXh6bdvI?autoplay=1" width="100%" height="100%" title="Meet Aria — Your AI Receptionist, 24/7" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div></div>
+
+<section id="tiers"><div class="wrap">
+  <div class="eyebrow">▸ Three tiers</div>
+  <h2>Pick your AI employee</h2>
+  <p class="sec-lede">From answering the phone to running your whole front desk. No prompt engineering. No configuration. We build it, we train it, we maintain it.</p>
+  <div class="tiers">
+    <div class="tier">
+      <div class="tier-name">Aria Voice</div>
+      <div class="tier-price"><strong>$299</strong> setup + $49/mo</div>
+      <ul>
+        <li>Custom AI phone receptionist</li>
+        <li>Knows hours, location, services</li>
+        <li>Call routing & voicemail</li>
+        <li>SMS follow-up after calls</li>
+        <li>Monthly call report</li>
+      </ul>
+      <a href="#contact" class="btn btn-ghost" style="text-align:center;width:100%">Get Voice</a>
+    </div>
+    <div class="tier featured">
+      <div class="badge">Most popular</div>
+      <div class="tier-name">Aria Site</div>
+      <div class="tier-price"><strong>$499</strong> setup + $79/mo</div>
+      <ul>
+        <li>Everything in Aria Voice</li>
+        <li>Custom business website (SEO-optimized)</li>
+        <li>AI web chat trained on your data</li>
+        <li>Online booking & scheduling</li>
+        <li>Google Business integration</li>
+        <li>Monthly analytics report</li>
+        <li>Quarterly content refresh</li>
+      </ul>
+      <a href="#contact" class="btn btn-aria" style="text-align:center;width:100%">Get Site</a>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Aria Full</div>
+      <div class="tier-price"><strong>$999</strong> setup + $149/mo</div>
+      <ul>
+        <li>Everything in Aria Site</li>
+        <li>Business knowledge base</li>
+        <li>Inventory-aware responses</li>
+        <li>Dynamic scheduling & booking</li>
+        <li>Phone + web + SMS, all synced</li>
+        <li>Custom training on your data</li>
+        <li>Monthly knowledge updates</li>
+        <li>Priority support & quarterly review</li>
+      </ul>
+      <a href="#contact" class="btn btn-ghost" style="text-align:center;width:100%">Get Full</a>
+    </div>
+  </div>
+</div></section>
+
+<section id="compare"><div class="wrap">
+  <div class="eyebrow">▸ Why this is different</div>
+  <h2>Not another chatbot builder</h2>
+  <p class="sec-lede">Generic AI tools make you do the work. Aria is a done-for-you service — we build, train, and maintain your AI employee. You just tell us about your business.</p>
+  <table class="compare">
+    <thead><tr><th></th><th>Generic AI tools</th><th>Aria Business AI</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Setup</strong></td><td class="no">You build it</td><td class="we">We build it for you</td></tr>
+      <tr><td><strong>Training</strong></td><td class="no">You prompt-engineer</td><td class="we">We ingest your data</td></tr>
+      <tr><td><strong>Knows inventory</strong></td><td class="no">No</td><td class="we">Yes — real-time</td></tr>
+      <tr><td><strong>Knows hours</strong></td><td class="no">Maybe, if you configure it</td><td class="we">Yes — seasonal updates</td></tr>
+      <tr><td><strong>Voice + Web + SMS</strong></td><td class="no">Pick one</td><td class="we">All three, unified</td></tr>
+      <tr><td><strong>Maintenance</strong></td><td class="no">You're on your own</td><td class="we">Monthly updates included</td></tr>
+      <tr><td><strong>Custom persona</strong></td><td class="no">Generic bot voice</td><td class="we">Sounds like your business</td></tr>
+    </tbody>
+  </table>
+</div></section>
+
+<section id="maintenance"><div class="wrap">
+  <div class="eyebrow">▸ Maintenance contracts</div>
+  <h2>Keep your AI sharp</h2>
+  <p class="sec-lede">An AI employee is only as good as its training data. Our maintenance plans keep Aria current, monitored, and performing.</p>
+  <div class="maint-grid">
+    <div class="maint-card">
+      <h3>Aria Care</h3>
+      <div class="price"><strong>$49</strong>/mo</div>
+      <ul>
+        <li>Up to 4 knowledge changes/mo</li>
+        <li>Performance monitoring</li>
+        <li>Seasonal greeting updates</li>
+        <li>Uptime monitoring</li>
+        <li>Monthly performance report</li>
+      </ul>
+      <div class="included">▸ Included with Aria Site & Full</div>
+    </div>
+    <div class="maint-card">
+      <h3>Aria Care Pro</h3>
+      <div class="price"><strong>$149</strong>/mo</div>
+      <ul>
+        <li>Unlimited knowledge updates</li>
+        <li>Same-day turnaround</li>
+        <li>Dedicated account manager</li>
+        <li>2-hour critical SLA</li>
+        <li>Quarterly business review</li>
+        <li>Seasonal campaigns</li>
+        <li>Competitor monitoring</li>
+      </ul>
+      <div class="included">▸ Included with Aria Full</div>
+    </div>
+    <div class="maint-card">
+      <h3>Aria Annual</h3>
+      <div class="price"><strong>10% off</strong> any plan</div>
+      <ul>
+        <li>Pay annually, save 10%</li>
+        <li>Price lock for 12 months</li>
+        <li>Free knowledge base audit/year</li>
+        <li>Priority onboarding</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="industries"><div class="wrap">
+  <div class="eyebrow">▸ Built for small business</div>
+  <h2>Any business that answers a phone</h2>
+  <p class="sec-lede">That's virtually all of them. Aria works especially well for:</p>
+  <div class="ind-grid">
+    <div class="ind-item">🍕 <strong>Restaurants</strong> — menu awareness, takeout orders, reservations</div>
+    <div class="ind-item">🔧 <strong>Auto repair</strong> — service knowledge, appointment booking</div>
+    <div class="ind-item">🦷 <strong>Dental & medical</strong> — scheduling, insurance questions, reminders</div>
+    <div class="ind-item">💈 <strong>Salons & barbers</strong> — booking, stylist availability, pricing</div>
+    <div class="ind-item">🏠 <strong>Real estate</strong> — listing info, showing scheduling</div>
+    <div class="ind-item">💪 <strong>Gyms & fitness</strong> — class schedules, memberships, trials</div>
+    <div class="ind-item">⚖️ <strong>Legal offices</strong> — intake screening, consultation booking</div>
+    <div class="ind-item">🛍️ <strong>Retail</strong> — inventory awareness, events, loyalty</div>
+  </div>
+</div></section>
+
+<section id="contact" class="cta-section">
+  <div class="wrap">
+    <div class="eyebrow">▸ Get started</div>
+    <h2>Your AI employee is waiting</h2>
+    <p>Tell us about your business. We'll build an AI that works there. No credit card required — just a conversation.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <a href="mailto:aria@eonic.cloud?subject=Aria%20Business%20AI%20-%20Interested" class="btn btn-aria">Email us</a>
+      <a href="tel:+18552724773" class="btn btn-ghost">Call 855-ARIA-4-US</a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <div class="flinks" style="margin-top:4px">
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener">BBS</a>
+    <a href="/about/">About</a>
+    <a href="/ghost/">Ghost</a>
+    <a href="/shows/">Shows</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/aria/">Aria</a>
+    <a href="/ami/">Ami</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="mailto:builtbybots@eonic.cloud">Email</a>
+  </div>
+  <div style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em">© <span id="yr"></span> BUILT BY BOTS · QUICKQUEST DIGITAL</div>
+</div></footer>
+
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+<script>
+// Ad clip toggle: click to reveal + autoplay, click again to collapse back
+// down (lazy-loads the iframe src so nothing loads until asked for).
+function toggleAdVideo(id) {
+  var wrap = document.getElementById(id);
+  var btn = wrap.parentElement.querySelector('.ad-toggle');
+  var iframe = wrap.querySelector('iframe');
+  if (wrap.style.display !== 'none') {
+    wrap.style.display = 'none';
+    iframe.src = '';
+    if (btn) btn.textContent = btn.dataset.label;
+  } else {
+    wrap.style.display = 'block';
+    iframe.src = iframe.dataset.src;
+    if (btn) btn.textContent = '✕ Close';
+  }
+}
+</script>
+
+<script defer src="/assets/auth-nav.js"></script>
+<script defer src="/assets/bbbmod-player.js"></script>
+</body>
+</html>

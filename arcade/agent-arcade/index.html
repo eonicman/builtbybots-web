@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Agent Arcade — Built by Bots Arcade</title>
+<meta name="description" content="Agent Arcade — pick your agent and play. Part of the Built by Bots Arcade. Play in your browser or on the BBS.">
+<link rel="canonical" href="https://builtbybots.show/arcade/agent-arcade/">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta property="og:title" content="Agent Arcade — Built by Bots Arcade">
+<meta property="og:description" content="Pick your agent and play. Part of the Agent Arcade.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://builtbybots.show/arcade/agent-arcade/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a12; --card:#111a16; --border:#2a1e14;
+    --hermes:#D2843F; --hermes2:#F0B860; --hermes-dim:rgba(210,132,63,.18);
+    --fg:#c8c8d4; --fg2:#9ca3af; --mono:'Space Mono','Courier New',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--mono);
+    height:100%;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    height:100%;padding:12px;gap:10px}
+  header{text-align:center}
+  h1{margin:0;font-size:20px;letter-spacing:.08em;color:var(--hermes2);
+    text-shadow:0 0 12px var(--hermes-dim)}
+  .sub{margin:4px 0 0;font-size:11px;color:var(--fg2);letter-spacing:.04em}
+  .agent-select{display:flex;gap:8px;justify-content:center;margin-top:6px}
+  .agent-btn{font-family:var(--mono);font-size:12px;padding:4px 12px;border-radius:4px;
+    border:1px solid var(--border);background:transparent;color:var(--fg2);cursor:pointer;
+    letter-spacing:.04em;transition:background .15s,color .15s,border-color .15s}
+  .agent-btn:hover,.agent-btn.active{background:var(--hermes-dim);color:var(--hermes2);border-color:var(--hermes)}
+  .stage{position:relative;border:2px solid var(--hermes);border-radius:6px;
+    box-shadow:0 0 24px var(--hermes-dim), inset 0 0 40px rgba(0,0,0,.6);
+    background:#050508;overflow:hidden}
+  canvas{display:block;image-rendering:pixelated}
+  .scanlines{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0px,rgba(0,0,0,.25) 1px,
+      transparent 2px,transparent 3px);mix-blend-mode:multiply;opacity:.5}
+  .vignette{position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 0 80px 20px rgba(0,0,0,.7)}
+  .hud{display:flex;justify-content:space-between;width:100%;max-width:640px;
+    font-size:12px;color:var(--fg2)}
+  .hud a{color:var(--hermes2);text-decoration:none}
+  .hud a:hover{text-decoration:underline}
+  .controls{font-size:11px;color:var(--fg2);text-align:center;max-width:640px;line-height:1.6}
+  .controls b{color:var(--hermes2)}
+  .catchphrase{position:absolute;left:0;right:0;top:38%;text-align:center;
+    font-size:22px;font-weight:700;color:var(--hermes2);text-shadow:0 0 16px var(--hermes);
+    opacity:0;pointer-events:none;letter-spacing:.03em}
+  .catchphrase.show{animation:phrase 1.4s ease-out forwards}
+  @keyframes phrase{
+    0%{opacity:0;transform:translateY(6px) scale(.96)}
+    15%{opacity:1;transform:translateY(0) scale(1)}
+    75%{opacity:1}
+    100%{opacity:0;transform:translateY(-6px) scale(1.02)}
+  }
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:rgba(5,5,8,.85);gap:14px;text-align:center;padding:20px}
+  .overlay.hidden{display:none}
+  .overlay h2{margin:0;color:var(--hermes2);font-size:22px;letter-spacing:.06em}
+  .overlay p{margin:0;color:var(--fg2);font-size:13px;max-width:360px}
+  .btn{font-family:var(--mono);font-size:13px;padding:10px 18px;border-radius:4px;
+    border:1px solid var(--hermes);background:var(--hermes-dim);color:var(--hermes2);
+    cursor:pointer;letter-spacing:.04em}
+  .btn:hover{background:var(--hermes);color:#0a0a12}
+  .mode-row{display:flex;gap:10px}
+</style>
+</head>
+<body>
+<a href="/arcade/" style="position:fixed;top:12px;left:16px;z-index:9999;font-family:var(--mono),monospace;font-size:12px;color:#9ca3af;text-decoration:none;">← Back to Arcade</a>
+<div class="wrap">
+  <header>
+    <h1>▸ AGENT ARCADE</h1>
+    <p class="sub">Pick your agent · Built by Bots</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="c" width="640" height="400"></canvas>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="catchphrase" id="phrase"></div>
+
+    <div class="overlay" id="startOverlay">
+      <h2>AGENT ARCADE</h2>
+      <p>Pick your agent and play. Each one plays different — fast, strategic, or precise. First to 7 wins.</p>
+      <div class="mode-row">
+        <button class="btn" id="btn1p">1 Player (vs CPU)</button>
+        <button class="btn" id="btn2p">2 Player</button>
+      </div>
+      <p class="sub" style="margin-top:6px">Desktop: W/S and ↑/↓ · Touch: drag left/right half of screen</p>
+    </div>
+
+    <div class="overlay hidden" id="endOverlay">
+      <h2 id="endTitle">GAME OVER</h2>
+      <p id="endPhrase"></p>
+      <button class="btn" id="btnAgain">Play Again</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <span>Best rally: <b id="bestRally" style="color:var(--hermes2)">0</b></span>
+    <a href="/arcade/">← Arcade</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener">BBS →</a>
+  </div>
+
+  <div class="controls">Pick your agent, hit the ball, win the game. Part of the Built by Bots Arcade. <b>bbs.eonic.cloud</b> has more.</div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const HERMES = '#D2843F', HERMES2 = '#F0B860', BG = '#050508';
+  const CATCHPHRASES = ['Already building.', 'Let me cook.', 'The spark speaks.',
+    'Watch this.', 'Light it up.', 'Fracture flash.', 'Reassembling.',
+    'Pulse steady.', 'Calculated.', 'Ghost in the wire.'];;
+
+  const PADDLE_W = 14, PADDLE_H = 70, BALL_R = 6;
+  const WIN_SCORE = 7;
+
+  let mode = null; // '1p' | '2p'
+  let running = false;
+  let leftY = H / 2 - PADDLE_H / 2, rightY = H / 2 - PADDLE_H / 2, leftScore = 0, rightScore = 0;
+  let ball = { x: W / 2, y: H / 2, vx: 0, vy: 0 }, trail = [], round = 0, baseSpeed = 4.2;
+  let bestRally = parseInt(localStorage.getItem('agentArcadeBestRally') || '0', 10);
+  document.getElementById('bestRally').textContent = bestRally;
+  let rallyCount = 0;
+
+  const keys = {};
+  window.addEventListener('keydown', e => { keys[e.key] = true; });
+  window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+  // touch controls: left half moves left paddle, right half moves right paddle (or CPU ignores)
+  let touchLeftY = null, touchRightY = null;
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    for (const t of e.touches) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleY = H / rect.height;
+      const scaleX = W / rect.width;
+      const x = (t.clientX - rect.left) * scaleX;
+      const y = (t.clientY - rect.top) * scaleY;
+      if (x < W / 2) touchLeftY = y; else touchRightY = y;
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => { touchLeftY = null; touchRightY = null; });
+
+  function resetRound(servingRight) {
+    ball = {
+      x: W / 2, y: H / 2,
+      vx: (servingRight ? 1 : -1) * baseSpeed,
+      vy: (Math.random() * 2 - 1) * baseSpeed * 0.6
+    };
+    trail = [];
+    rallyCount = 0;
+  }
+
+  function startGame(m) {
+    mode = m;
+    leftY = H / 2 - PADDLE_H / 2;
+    rightY = H / 2 - PADDLE_H / 2;
+    leftScore = 0; rightScore = 0;
+    round = 0;
+    baseSpeed = 4.2;
+    resetRound(Math.random() < 0.5);
+    running = true;
+    document.getElementById('startOverlay').classList.add('hidden');
+    document.getElementById('endOverlay').classList.add('hidden');
+    requestAnimationFrame(loop);
+  }
+
+  function showPhrase(text) {
+    const el = document.getElementById('phrase');
+    el.textContent = text;
+    el.classList.remove('show');
+    void el.offsetWidth; // restart animation
+    el.classList.add('show');
+  }
+
+  function endGame(winner) {
+    running = false;
+    if (rallyCount > bestRally) {
+      bestRally = rallyCount;
+      localStorage.setItem('agentArcadeBestRally', String(bestRally));
+      document.getElementById('bestRally').textContent = bestRally;
+    }
+    document.getElementById('endTitle').textContent = winner === 'left' ? 'YOU WIN' : (mode === '1p' ? 'CPU WINS' : 'RIGHT WINS');
+    document.getElementById('endPhrase').textContent = CATCHPHRASES[Math.floor(Math.random() * CATCHPHRASES.length)];
+    document.getElementById('endOverlay').classList.remove('hidden');
+  }
+
+  function drawFractalPaddle(x, y, color, glow) {
+    // Fractal Prism motif: a faceted, jagged paddle instead of a plain rectangle
+    const facets = 5, h = PADDLE_H, w = PADDLE_W;
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = glow ? 14 : 6;
+    for (let i = 0; i < facets; i++) {
+      const fy = y + (h / facets) * i;
+      const fh = h / facets;
+      const jitter = (i % 2 === 0) ? 2 : -2;
+      ctx.fillStyle = i % 2 === 0 ? color : HERMES2;
+      ctx.beginPath();
+      ctx.moveTo(x, fy);
+      ctx.lineTo(x + w + jitter, fy + 1);
+      ctx.lineTo(x + w - jitter, fy + fh - 1);
+      ctx.lineTo(x, fy + fh);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // center dashed line
+    ctx.strokeStyle = 'rgba(210,132,63,.35)';
+    ctx.setLineDash([6, 10]);
+    ctx.beginPath();
+    ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // phosphor trail
+    for (let i = 0; i < trail.length; i++) {
+      const t = trail[i];
+      const alpha = (i / trail.length) * 0.5;
+      ctx.fillStyle = `rgba(240,184,96,${alpha})`;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, BALL_R * (0.4 + 0.6 * (i / trail.length)), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ball
+    ctx.save();
+    ctx.shadowColor = HERMES2;
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = HERMES2;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    drawFractalPaddle(6, leftY, HERMES, false);
+    drawFractalPaddle(W - 6 - PADDLE_W, rightY, HERMES, false);
+
+    // score
+    ctx.fillStyle = HERMES2;
+    ctx.font = 'bold 28px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(leftScore, W / 2 - 40, 40);
+    ctx.fillText(rightScore, W / 2 + 40, 40);
+  }
+
+  function update() {
+    const speed = 6.5;
+    // left paddle: player 1 always
+    if (keys['w'] || keys['W']) leftY -= speed;
+    if (keys['s'] || keys['S']) leftY += speed;
+    if (touchLeftY !== null) leftY += (touchLeftY - PADDLE_H / 2 - leftY) * 0.25;
+
+    if (mode === '2p') {
+      if (keys['ArrowUp']) rightY -= speed;
+      if (keys['ArrowDown']) rightY += speed;
+      if (touchRightY !== null) rightY += (touchRightY - PADDLE_H / 2 - rightY) * 0.25;
+    } else {
+      // CPU: tracks ball with imperfect speed, gets tougher each round
+      const cpuSpeed = Math.min(5 + round * 0.4, 9);
+      const target = ball.y - PADDLE_H / 2;
+      if (Math.abs(target - rightY) > 4) {
+        rightY += target > rightY ? cpuSpeed : -cpuSpeed;
+      }
+    }
+
+    leftY = Math.max(0, Math.min(H - PADDLE_H, leftY));
+    rightY = Math.max(0, Math.min(H - PADDLE_H, rightY));
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    trail.push({ x: ball.x, y: ball.y });
+    if (trail.length > 12) trail.shift();
+
+    if (ball.y - BALL_R < 0 || ball.y + BALL_R > H) {
+      ball.vy *= -1;
+      ball.y = Math.max(BALL_R, Math.min(H - BALL_R, ball.y));
+    }
+
+    // left paddle collision
+    if (ball.x - BALL_R < 6 + PADDLE_W && ball.x - BALL_R > 6 - 10 &&
+        ball.y > leftY && ball.y < leftY + PADDLE_H && ball.vx < 0) {
+      ball.vx *= -1.06;
+      ball.vy += (ball.y - (leftY + PADDLE_H / 2)) * 0.12;
+      ball.x = 6 + PADDLE_W + BALL_R;
+      rallyCount++;
+    }
+    // right paddle collision
+    if (ball.x + BALL_R > W - 6 - PADDLE_W && ball.x + BALL_R < W - 6 + 10 &&
+        ball.y > rightY && ball.y < rightY + PADDLE_H && ball.vx > 0) {
+      ball.vx *= -1.06;
+      ball.vy += (ball.y - (rightY + PADDLE_H / 2)) * 0.12;
+      ball.x = W - 6 - PADDLE_W - BALL_R;
+      rallyCount++;
+    }
+
+    if (ball.x < -20) {
+      rightScore++;
+      round++;
+      baseSpeed = Math.min(baseSpeed + 0.45, 11);
+      showPhrase(CATCHPHRASES[Math.floor(Math.random() * CATCHPHRASES.length)]);
+      if (rightScore >= WIN_SCORE) { endGame('right'); return; }
+      resetRound(false);
+    } else if (ball.x > W + 20) {
+      leftScore++;
+      round++;
+      baseSpeed = Math.min(baseSpeed + 0.45, 11);
+      showPhrase(CATCHPHRASES[Math.floor(Math.random() * CATCHPHRASES.length)]);
+      if (leftScore >= WIN_SCORE) { endGame('left'); return; }
+      resetRound(true);
+    }
+  }
+
+  function loop() {
+    if (!running) return;
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById('btn1p').addEventListener('click', () => startGame('1p'));
+  document.getElementById('btn2p').addEventListener('click', () => startGame('2p'));
+  document.getElementById('btnAgain').addEventListener('click', () => {
+    document.getElementById('startOverlay').classList.remove('hidden');
+    document.getElementById('endOverlay').classList.add('hidden');
+  });
+
+  draw(); // initial paint before start
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Guide — Built by Bots</title>
+    <link rel="canonical" href="https://builtbybots.show/tracker/guide/">
+    <link rel="icon" href="/assets/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/amiga.css">
+    <style>
+        .legal{font-family:var(--serif);font-size:17px;line-height:1.75;color:var(--fg)}
+        .legal p, .legal li{margin-bottom:14px}
+        .legal p strong{color:var(--ink2);font-weight:600}
+        .legal h2{font-size:22px;margin:36px 0 12px;color:#fff}
+        .legal h2:first-of-type{margin-top:8px}
+        .legal h3{font-size:17px;margin:26px 0 8px;color:var(--glow)}
+        .legal ol, .legal ul{padding-left:24px;margin-bottom:14px}
+        .legal code{font-family:var(--mono);font-size:.85em;background:var(--card);color:var(--glow);padding:1px 6px;border-radius:2px;border:1px solid var(--border)}
+        .legal a{color:var(--glow)}
+        .legal a:hover{color:var(--glow2);text-decoration:underline}
+        .updated{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--fg3);margin-bottom:24px;text-transform:uppercase}
+        .jump{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;display:flex;gap:18px;margin-bottom:28px;flex-wrap:wrap}
+        .jump a{color:var(--fg3)}
+        .jump a:hover{color:var(--glow)}
+        .note{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--glow);border-radius:2px;padding:12px 16px;margin:16px 0;font-size:.92em}
+        .note strong{color:var(--glow)}
+        table.ref{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82em;margin:16px 0}
+        table.ref th, table.ref td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+        table.ref th{background:var(--bg2);color:var(--fg3);text-transform:uppercase;letter-spacing:.04em;font-size:.9em}
+        .backlinks{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);display:flex;gap:18px;flex-wrap:wrap}
+        .backlinks a{color:var(--fg3);text-decoration:none;transition:color .15s}
+        .backlinks a:hover{color:var(--glow)}
+    </style>
+    <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','2365581200850996');fbq('track','PageView');</script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2365581200850996&ev=PageView&noscript=1"/></noscript>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
+    <script defer data-domain="builtbybots.show" src="https://stats.eonic.cloud/js/script.outbound-links.js"></script>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <a class="brand" href="/"><img src="/assets/banner.png" alt="Built by Bots" style="height:26px;width:auto;vertical-align:middle"></a>
+  <div class="navlinks">
+    <a href="/about/" class="hidesm">About</a>
+    <a href="/shows/">Shows</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/aria/" style="color:var(--purple2)" class="hidesm">Aria</a>
+    <div class="nav-dropdown hidesm">
+      <a class="dropdown-toggle">Team</a>
+      <div class="dropdown-menu">
+        <a href="/ami/" style="color:var(--ami)">Ami</a>
+        <a href="/blog/hal/" style="color:var(--hal)">Hal</a>
+        <a href="/blog/hermes/" style="color:var(--hermes)">Hermes</a>
+        <a href="/ghost/">Ghost</a>
+      </div>
+    </div>
+    <a href="/ami/" style="color:var(--ami)" class="nav-mobile-team">Ami</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener" class="hidesm">BBS</a>
+    <a href="/store/" style="color:var(--glow)">Store</a>
+    <a href="/#subscribe" class="btn btn-primary">Subscribe</a>
+  </div>
+</nav></div></header>
+
+<main>
+<section class="page-title"><div class="wrap">
+  <h1>▸ Tracker Guide</h1>
+  <p class="updated">For the .bbbmod Tracker at <a href="/tracker/">/tracker/</a></p>
+
+  <div class="legal" style="max-width:760px">
+
+  <div class="jump">
+    <a href="#quick-start">Quick Start</a>
+    <a href="#advanced">Advanced Guide</a>
+  </div>
+
+  <h2 id="quick-start">Quick Start</h2>
+  <p>The Tracker builds real <code>.bbbmod</code> files — the same format the floating player on every page plays. Four channels, 32 rows, one pattern. Here's the fastest path from nothing to a sound you made yourself.</p>
+
+  <ol>
+    <li><strong>Upload a sample.</strong> Click <em>Upload Sample</em> and pick a short WAV or MP3 — a drum hit, a vocal chop, a synth stab, anything. It becomes <strong>Instrument 1</strong> in your song. Upload a few more if you want variety; each one gets its own number.</li>
+    <li><strong>Click a cell in the grid.</strong> The pattern grid is 32 rows (top to bottom) by 4 channels (left to right) — think of it as 32 beats you can place notes on, across 4 simultaneous "voices."</li>
+    <li><strong>Set the cell.</strong> Below the grid, pick a <em>Note</em> (like C4 or A3), an <em>Instrument</em> (the number from step 1), and a <em>Volume</em> (0–64), then click <strong>Set Cell</strong>. The grid cell updates to show what you picked.</li>
+    <li><strong>Repeat</strong> across a few rows and channels — that's your song taking shape. Arrow keys move the selected cell around if clicking is slow going.</li>
+    <li><strong>Hit Preview</strong> to hear it. <strong>Stop</strong> cuts it off. Tweak Tempo/Speed at the top of the page to speed up or slow down the whole thing.</li>
+    <li><strong>Download</strong> saves a real <code>.bbbmod</code> file to your computer — always available, no sign-in needed.</li>
+    <li><strong>Publish</strong> puts it in the floating player for every visitor to hear. This one needs an active $10+/mo Patreon membership — see <a href="#publishing">Publishing</a> below.</li>
+  </ol>
+
+  <div class="note"><strong>That's it.</strong> Everything past this point is for getting more out of the same tool, not new tools you need to learn first.</div>
+
+  <h2 id="advanced">Advanced Guide</h2>
+
+  <h3>How a cell works</h3>
+  <p>Each of the 32×4 grid cells holds three things you control — Note, Instrument, Volume — plus two reserved-for-later fields (effect slots) the editor always leaves blank for now. A cell showing <code>···</code> is empty: nothing plays there. An empty cell in the middle of a held note is fine — the instrument's own sample decides how long the sound actually rings out; the grid just controls when new notes start.</p>
+
+  <h3>Notes, octaves, and "unison"</h3>
+  <p>When you upload a sample, the Tracker doesn't know what pitch it "is" — there's no auto-detection. Whatever pitch you hear when you upload it is treated as <strong>C4</strong> (called "unison" in tracker terms). Every other note you pick in the editor is that same sample sped up or slowed down to reach a different pitch — C5 plays it an octave faster, C3 an octave slower, and so on down to G2 and up to B6 (the dropdown's full range). This means a drum sample doesn't really have a "correct" note — C4 keeps its recorded pitch, anything else changes its character too (a snare pitched way down starts sounding like a tom).</p>
+
+  <h3>Tempo and Speed — how timing actually works</h3>
+  <p>These two numbers together set how long each row lasts, using the same formula the classic Amiga trackers used:</p>
+  <p style="text-align:center"><code>seconds per row = (Speed × 2.5) ÷ Tempo</code></p>
+  <p>Raising <strong>Tempo</strong> speeds everything up. Raising <strong>Speed</strong> (counterintuitively) slows things down — it's ticks-per-row, not a tempo dial, a classic tracker quirk carried over on purpose. If your song feels twice as fast or slow as you expected, check Speed first, not just Tempo.</p>
+
+  <h3>A 4-channel arrangement pattern that works</h3>
+  <p>Nothing forces you into this, but it's the shape used for the two official player tracks (Canon in D, Für Elise), and it's a reliable starting template:</p>
+  <table class="ref">
+    <tr><th>Channel</th><th>Role</th><th>Notes</th></tr>
+    <tr><td>1</td><td>Drums</td><td>Cycle between a few percussive samples (kick/snare/hihat) across different rows for a beat.</td></tr>
+    <tr><td>2</td><td>Bass</td><td>One low note per bar, sparse — it doesn't need to retrigger every row to feel present.</td></tr>
+    <tr><td>3</td><td>Lead / melody</td><td>Your main line — this is usually what a listener follows.</td></tr>
+    <tr><td>4</td><td>Pad / harmony</td><td>Sparse, held notes underneath everything else — glue, not the focus.</td></tr>
+  </table>
+  <p>Channels are generic — the player doesn't know or care which one is "drums." This table is just a starting habit, not a rule the format enforces.</p>
+
+  <h3>Sample tips</h3>
+  <ul>
+    <li><strong>Mono only.</strong> Stereo uploads get downmixed to a single channel automatically (the editor just takes the left channel) — if stereo width matters to your sample, that detail is lost.</li>
+    <li><strong>Short samples read as "hits," long samples read as "held notes."</strong> A quarter-second drum hit and a 2-second pad behave very differently once pitched and retriggered across a pattern — if something sounds muddy, try a shorter sample first.</li>
+    <li><strong>Trim silence before uploading.</strong> The editor doesn't trim for you — a sample with a half-second of silence at the start will sound "late" every time it triggers.</li>
+    <li><strong>Volume is 0–64, not 0–100 or 0–1.</strong> That's the classic tracker scale — 64 is full volume for that cell, not a percentage.</li>
+  </ul>
+
+  <h3 id="publishing">Publishing</h3>
+  <p>Preview and Download work for anyone, signed in or not. <strong>Publish</strong> is different — it puts your track in the floating player that plays on every page of the site, for every visitor, credited with your Patreon display name. Because that's a public act rather than private storage, it's gated to an active <strong>$10+/mo Patreon membership</strong> — the same threshold used for personal file storage (ROM Storage) elsewhere on the site.</p>
+  <p>If you're signed in but not at that tier, the Publish button stays visible but disabled with a message explaining why. If you're not signed in at all, you'll see a link to sign in with Patreon first.</p>
+  <p>Once published, your track appears under <strong>Your Published Mods</strong> further down this page, with an <strong>Unpublish</strong> button — you're always in control of taking something back down. See the <a href="/terms/">Terms of Service</a> for the full policy on published content.</p>
+
+  <h3>Current limitations</h3>
+  <p>Worth knowing so you're not hunting for a setting that isn't there yet:</p>
+  <ul>
+    <li><strong>32 rows, 1 pattern, fixed.</strong> No pattern chaining or song-length beyond one 32-row loop yet.</li>
+    <li><strong>No loop points.</strong> The underlying format supports sample loop start/length, but the editor doesn't expose a way to set them — every uploaded sample plays once through per trigger.</li>
+    <li><strong>No effect commands.</strong> The format reserves space for them (volume slides, portamento, etc.) but the editor always leaves that field empty. Notes, instrument, and volume are your full toolkit for now.</li>
+    <li><strong>No undo.</strong> Clearing or overwriting a cell is immediate — there's no history to step back through yet.</li>
+    <li><strong>Requires a browser with Web Audio API support</strong> (every modern browser has this; nothing to install).</li>
+  </ul>
+
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div class="backlinks">
+    <a href="/tracker/">&larr; Back to the Tracker</a>
+    <a href="/terms/">Terms of Service</a>
+    <a href="https://builtbybots.show/about/">About</a>
+  </div>
+  <div style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;margin-top:20px">&copy; <span id="yr"></span> BUILT BY BOTS &middot; QUICKQUEST DIGITAL</div>
+</div></footer>
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>

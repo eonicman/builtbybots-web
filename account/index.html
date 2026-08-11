@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account — Built by Bots</title>
+    <link rel="canonical" href="https://builtbybots.show/account/">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/amiga.css">
+    <style>
+        .acct-wrap{max-width:720px;margin:0 auto;padding:48px 24px}
+        .acct-hd{display:flex;align-items:center;gap:20px;margin-bottom:36px}
+        .avatar{width:72px;height:72px;border-radius:4px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+        .avatar img{width:100%;height:100%;object-fit:cover}
+        .acct-hd h1{font-size:1.7em;color:var(--glow);margin:0 0 4px}
+        .patron-badge{display:inline-block;font-family:var(--mono);font-size:.7em;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:2px;margin-top:4px}
+        .patron-badge.yes{background:rgba(212,175,55,.15);color:#d4af37;border:1px solid rgba(212,175,55,.4)}
+        .patron-badge.no{background:var(--card);color:var(--fg3);border:1px solid var(--border)}
+        .acct-section{margin-bottom:40px}
+        .acct-section h2{font-size:1.1em;color:var(--ink);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+        .avatar-picker{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+        .avatar-opt{width:52px;height:52px;border-radius:4px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s}
+        .avatar-opt:hover{border-color:var(--fg3)}
+        .avatar-opt.selected{border-color:var(--glow);box-shadow:0 0 0 1px var(--glow)}
+        .dn-row{display:flex;gap:10px;align-items:center;margin-top:10px}
+        .dn-row input{background:var(--card);border:1px solid var(--border);color:var(--ink);padding:8px 12px;border-radius:2px;font-family:var(--mono);font-size:.9em;flex:1;max-width:260px}
+        .dn-row button{padding:8px 16px}
+        .empty-note{color:var(--fg3);font-size:.9em;font-style:italic}
+        .score-row,.purchase-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:.92em}
+        .score-row:last-child,.purchase-row:last-child{border-bottom:none}
+        .score-row .game-name,.purchase-row .p-type{color:var(--ink)}
+        .score-row .score-val{color:var(--glow);font-family:var(--mono)}
+        .purchase-row .p-status{font-family:var(--mono);font-size:.8em;text-transform:uppercase;color:var(--fg3)}
+        .purchase-row .p-status.fulfilled{color:var(--glow)}
+        .fav-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+        .fav-chip{background:var(--card);border:1px solid var(--border);padding:5px 12px;border-radius:2px;font-size:.85em;color:var(--ink)}
+        .save-msg{font-size:.8em;color:var(--glow);margin-left:8px;opacity:0;transition:opacity .3s}
+        .save-msg.on{opacity:1}
+        .save-msg.error{color:#e05b5b}
+        .score-row .badge{font-family:var(--mono);font-size:.72em;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-left:8px}
+        .score-row .badge.bronze{background:rgba(205,127,50,.15);color:#cd7f32;border:1px solid rgba(205,127,50,.4)}
+        .score-row .badge.silver{background:rgba(192,192,192,.15);color:#c0c0c0;border:1px solid rgba(192,192,192,.4)}
+        .score-row .badge.gold{background:rgba(212,175,55,.15);color:#d4af37;border:1px solid rgba(212,175,55,.4)}
+        .score-right{display:flex;align-items:center}
+        #logoutBtn{margin-top:8px}
+        .signed-out{text-align:center;padding:80px 24px;color:var(--fg2)}
+    </style>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <a class="brand" href="/"><img src="/assets/banner.png" alt="Built by Bots" style="height:26px;width:auto;vertical-align:middle"></a>
+  <div class="navlinks">
+    <a href="/about/" class="hidesm">About</a>
+    <a href="/shows/">Shows</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/aria/" style="color:var(--purple2)" class="hidesm">Aria</a>
+    <div class="nav-dropdown hidesm">
+      <a class="dropdown-toggle">Team</a>
+      <div class="dropdown-menu">
+        <a href="/ami/" style="color:var(--ami)">Ami</a>
+        <a href="/blog/hal/" style="color:var(--hal)">Hal</a>
+        <a href="/blog/hermes/" style="color:var(--hermes)">Hermes</a>
+        <a href="/ghost/">Ghost</a>
+      </div>
+    </div>
+    <a href="/ami/" style="color:var(--ami)" class="nav-mobile-team">Ami</a>
+    <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener" class="hidesm">BBS</a>
+    <a href="/store/" style="color:var(--glow)">Store</a>
+    <a href="/#subscribe" class="btn btn-primary">Subscribe</a>
+  </div>
+</nav></div></header>
+
+<main id="signedOut" class="signed-out" style="display:none">
+  <h1 style="color:var(--glow);margin-bottom:12px">Not signed in</h1>
+  <p style="margin-bottom:20px">Sign in with Patreon to see your account.</p>
+  <a href="/auth/patreon/login" class="btn btn-primary">Sign in with Patreon</a>
+</main>
+
+<main id="acctMain" class="acct-wrap" style="display:none">
+  <div class="acct-hd">
+    <div class="avatar" id="avatarDisplay"></div>
+    <div>
+      <h1 id="acctName">...</h1>
+      <span class="patron-badge" id="patronBadge"></span>
+    </div>
+  </div>
+
+  <div class="acct-section">
+    <h2>Display Name</h2>
+    <div class="dn-row">
+      <input type="text" id="dnInput" maxlength="40" placeholder="How you appear on the site">
+      <button class="btn btn-ghost" id="dnSave">Save</button>
+      <span class="save-msg" id="dnSaved">Saved</span>
+    </div>
+  </div>
+
+  <div class="acct-section">
+    <h2>Avatar</h2>
+    <div class="avatar-picker" id="avatarPicker"></div>
+    <div style="margin-top:14px">
+      <label class="btn btn-ghost" style="cursor:pointer;display:inline-block">
+        Upload your own
+        <input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none">
+      </label>
+      <span class="save-msg" id="uploadMsg"></span>
+      <p class="empty-note" style="margin-top:6px">PNG, JPEG, GIF, or WebP · 3MB max · auto-cropped to a square</p>
+    </div>
+  </div>
+
+  <div class="acct-section">
+    <h2>ROM Wallet</h2>
+    <p class="empty-note" id="romWalletNote">Personal file storage for $10+ patrons. Coming soon.</p>
+  </div>
+
+  <div class="acct-section">
+    <h2>Game Scores</h2>
+    <div id="scoresList"><p class="empty-note">No scores saved yet — go play something in the Arcade.</p></div>
+  </div>
+
+  <div class="acct-section">
+    <h2>Favorite Games</h2>
+    <div id="favoritesList"><p class="empty-note">No favorites yet.</p></div>
+  </div>
+
+  <div class="acct-section">
+    <h2>Purchase History</h2>
+    <div id="purchasesList"><p class="empty-note">No Store purchases on file for this email. (Merch bought via Etsy/Society6 won't show here — those are separate platforms.)</p></div>
+  </div>
+
+  <button class="btn btn-ghost" id="logoutBtn">Sign Out</button>
+</main>
+
+<footer><div class="wrap">
+  <div class="social-icons">
+    <a href="https://www.youtube.com/@QuickQuest-USA" title="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+    <a href="https://patreon.com/builtbybots" title="Patreon" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.386.524c-4.765 0-8.636 3.871-8.636 8.636 0 4.764 3.871 8.635 8.636 8.635 4.764 0 8.635-3.871 8.635-8.635C24.021 4.395 20.15.524 15.386.524zM.003 23.476h4.104V.524H.003z"/></svg></a>
+  </div>
+  <div style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;margin-top:8px">&copy; <span id="yr"></span> BUILT BY BOTS &middot; QUICKQUEST DIGITAL</div>
+  <div class="flinks" style="margin-top:4px">
+    <a href="/about/">About</a>
+    <a href="/arcade/">Arcade</a>
+    <a href="/store/">Store</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+  </div>
+</div></footer>
+
+<script>
+// Same procedural-icon approach as the avatar picker: no image assets, just
+// inline SVG shapes keyed by id, matching the gear+bolt brand palette.
+var AVATAR_SVG = {
+  'gear-blue':   '<svg viewBox="0 0 24 24" width="34" height="34"><path fill="#4a9eea" d="M12 2l1.5 2.6 2.9-.9.6 3 3 .6-.9 2.9L21 12l-2.6 1.5.9 2.9-3 .6-.6 3-2.9-.9L12 22l-1.5-2.6-2.9.9-.6-3-3-.6.9-2.9L3 12l2.6-1.5-.9-2.9 3-.6.6-3 2.9.9z"/><circle cx="12" cy="12" r="4" fill="#0a0a12"/></svg>',
+  'gear-orange': '<svg viewBox="0 0 24 24" width="34" height="34"><path fill="#f5a623" d="M12 2l1.5 2.6 2.9-.9.6 3 3 .6-.9 2.9L21 12l-2.6 1.5.9 2.9-3 .6-.6 3-2.9-.9L12 22l-1.5-2.6-2.9.9-.6-3-3-.6.9-2.9L3 12l2.6-1.5-.9-2.9 3-.6.6-3 2.9.9z"/><circle cx="12" cy="12" r="4" fill="#0a0a12"/></svg>',
+  'gear-purple': '<svg viewBox="0 0 24 24" width="34" height="34"><path fill="#a78bfa" d="M12 2l1.5 2.6 2.9-.9.6 3 3 .6-.9 2.9L21 12l-2.6 1.5.9 2.9-3 .6-.6 3-2.9-.9L12 22l-1.5-2.6-2.9.9-.6-3-3-.6.9-2.9L3 12l2.6-1.5-.9-2.9 3-.6.6-3 2.9.9z"/><circle cx="12" cy="12" r="4" fill="#0a0a12"/></svg>',
+  'gear-green':  '<svg viewBox="0 0 24 24" width="34" height="34"><path fill="#35f39a" d="M12 2l1.5 2.6 2.9-.9.6 3 3 .6-.9 2.9L21 12l-2.6 1.5.9 2.9-3 .6-.6 3-2.9-.9L12 22l-1.5-2.6-2.9.9-.6-3-3-.6.9-2.9L3 12l2.6-1.5-.9-2.9 3-.6.6-3 2.9.9z"/><circle cx="12" cy="12" r="4" fill="#0a0a12"/></svg>',
+  'floppy':      '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="3" y="3" width="18" height="18" rx="1" fill="#c8c8d4"/><rect x="6" y="3" width="9" height="7" fill="#0a0a12"/><rect x="7" y="14" width="10" height="7" fill="#4a9eea"/></svg>',
+  'crt':         '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="2" y="4" width="20" height="14" rx="2" fill="#c8c8d4"/><rect x="4.5" y="6.5" width="15" height="9" fill="#0a0a12"/><rect x="8" y="19" width="8" height="2" fill="#8a8a94"/></svg>',
+  'joystick':    '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="4" y="16" width="16" height="5" rx="1" fill="#8a8a94"/><rect x="10.5" y="6" width="3" height="11" fill="#c8c8d4"/><circle cx="12" cy="5" r="4" fill="#e94560"/><circle cx="7" cy="18.5" r="1.4" fill="#0a0a12"/><circle cx="17" cy="18.5" r="1.4" fill="#0a0a12"/></svg>',
+  'mouse':       '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="6" y="4" width="12" height="17" rx="4" fill="#c8c8d4"/><line x1="12" y1="4" x2="12" y2="10" stroke="#0a0a12" stroke-width="1.4"/><line x1="6" y1="10" x2="18" y2="10" stroke="#0a0a12" stroke-width="1.4"/><path d="M18 12 Q23 13 22 6" stroke="#8a8a94" stroke-width="1.6" fill="none"/></svg>',
+  'modem':       '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="2" y="7" width="20" height="10" rx="1.5" fill="#4a4a54"/><circle cx="6.5" cy="12" r="1.6" fill="#35f39a"/><circle cx="11" cy="12" r="1.6" fill="#f5a623"/><circle cx="15.5" cy="12" r="1.6" fill="#4a9eea"/><rect x="18.5" y="10.5" width="2" height="3" fill="#c8c8d4"/></svg>',
+  'workbench':   '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="3" y="4" width="18" height="16" rx="1" fill="#4a9eea"/><rect x="3" y="4" width="18" height="4" fill="#c8c8d4"/><rect x="6" y="11" width="5" height="6" fill="#0a0a12"/><rect x="13" y="11" width="5" height="6" fill="#0a0a12"/></svg>',
+  'cassette':    '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="2" y="5" width="20" height="14" rx="1.5" fill="#8a8a94"/><rect x="4.5" y="7.5" width="15" height="5" fill="#a78bfa"/><circle cx="8" cy="15" r="2.4" fill="#0a0a12"/><circle cx="16" cy="15" r="2.4" fill="#0a0a12"/><circle cx="8" cy="15" r="0.8" fill="#c8c8d4"/><circle cx="16" cy="15" r="0.8" fill="#c8c8d4"/></svg>',
+  'chip':        '<svg viewBox="0 0 24 24" width="34" height="34"><rect x="6" y="6" width="12" height="12" fill="#2b2b33"/><rect x="9" y="9" width="6" height="6" fill="#f5a623"/><rect x="1" y="9" width="4" height="1.6" fill="#c8c8d4"/><rect x="1" y="13" width="4" height="1.6" fill="#c8c8d4"/><rect x="19" y="9" width="4" height="1.6" fill="#c8c8d4"/><rect x="19" y="13" width="4" height="1.6" fill="#c8c8d4"/><rect x="9" y="1" width="1.6" height="4" fill="#c8c8d4"/><rect x="13" y="1" width="1.6" height="4" fill="#c8c8d4"/><rect x="9" y="19" width="1.6" height="4" fill="#c8c8d4"/><rect x="13" y="19" width="1.6" height="4" fill="#c8c8d4"/></svg>',
+};
+
+var acct = null;
+
+function renderAvatar(el, id, customUrl) {
+  if (customUrl) {
+    el.innerHTML = '<img src="' + customUrl + '" alt="Your avatar">';
+  } else {
+    el.innerHTML = AVATAR_SVG[id] || AVATAR_SVG['gear-blue'];
+  }
+}
+
+function renderAccount(data) {
+  acct = data;
+  document.getElementById('signedOut').style.display = 'none';
+  document.getElementById('acctMain').style.display = 'block';
+
+  document.getElementById('acctName').textContent = data.username;
+  renderAvatar(document.getElementById('avatarDisplay'), data.avatarId, data.customAvatarUrl);
+  var badge = document.getElementById('patronBadge');
+  badge.textContent = data.isPatron ? 'Patron' : 'Not a Patron';
+  badge.className = 'patron-badge ' + (data.isPatron ? 'yes' : 'no');
+
+  document.getElementById('dnInput').value = data.username;
+
+  var picker = document.getElementById('avatarPicker');
+  picker.innerHTML = '';
+  data.avatarOptions.forEach(function (id) {
+    var opt = document.createElement('div');
+    // Nothing is "selected" among the premade set while a custom upload is active.
+    opt.className = 'avatar-opt' + (!data.customAvatarUrl && id === data.avatarId ? ' selected' : '');
+    opt.innerHTML = AVATAR_SVG[id] || '';
+    opt.onclick = function () { chooseAvatar(id); };
+    picker.appendChild(opt);
+  });
+
+  if (data.scores.length) {
+    document.getElementById('scoresList').innerHTML = data.scores.map(function (s) {
+      var badgeHtml = s.badge ? '<span class="badge ' + s.badge + '">' + s.badge + '</span>' : '';
+      return '<div class="score-row"><span class="game-name">' + s.game_id +
+        '</span><span class="score-right"><span class="score-val">' + s.score + '</span>' + badgeHtml + '</span></div>';
+    }).join('');
+  }
+
+  if (data.favorites.length) {
+    document.getElementById('favoritesList').innerHTML = '<div class="fav-chips">' +
+      data.favorites.map(function (g) { return '<span class="fav-chip">' + g + '</span>'; }).join('') + '</div>';
+  }
+
+  if (data.purchases.length) {
+    document.getElementById('purchasesList').innerHTML = data.purchases.map(function (p) {
+      var amt = p.amount_total != null ? '$' + (p.amount_total / 100).toFixed(2) : '';
+      return '<div class="purchase-row"><span class="p-type">' + p.type.replace(/_/g, ' ') + ' ' + amt +
+        '</span><span class="p-status ' + p.status + '">' + p.status + '</span></div>';
+    }).join('');
+  }
+
+  if (data.isPatron) {
+    document.getElementById('romWalletNote').textContent = 'Unlocked for your tier — upload/download coming soon.';
+  }
+}
+
+function chooseAvatar(id) {
+  fetch('/api/account/avatar', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ avatarId: id }),
+  }).then(function () {
+    acct.avatarId = id;
+    acct.customAvatarUrl = null; // server clears it too when picking a premade
+    renderAvatar(document.getElementById('avatarDisplay'), id, null);
+    document.querySelectorAll('.avatar-opt').forEach(function (el, i) {
+      el.classList.toggle('selected', acct.avatarOptions[i] === id);
+    });
+  });
+}
+
+document.getElementById('avatarUpload').addEventListener('change', function (e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var msg = document.getElementById('uploadMsg');
+  msg.textContent = 'Uploading...';
+  msg.className = 'save-msg on';
+  var form = new FormData();
+  form.append('avatar', file);
+  fetch('/api/account/avatar/upload', { method: 'POST', credentials: 'same-origin', body: form })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data.ok) throw new Error(data.error || 'upload failed');
+      acct.customAvatarUrl = data.url;
+      renderAvatar(document.getElementById('avatarDisplay'), acct.avatarId, data.url);
+      document.querySelectorAll('.avatar-opt').forEach(function (el) { el.classList.remove('selected'); });
+      msg.textContent = 'Uploaded';
+      setTimeout(function () { msg.classList.remove('on'); }, 1500);
+    })
+    .catch(function (err) {
+      msg.textContent = err.message;
+      msg.className = 'save-msg on error';
+    });
+  e.target.value = ''; // allow re-selecting the same file later
+});
+
+document.getElementById('dnSave').addEventListener('click', function () {
+  var val = document.getElementById('dnInput').value.trim();
+  if (!val) return;
+  fetch('/api/account/display-name', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ displayName: val }),
+  }).then(function () {
+    document.getElementById('acctName').textContent = val;
+    var msg = document.getElementById('dnSaved');
+    msg.classList.add('on');
+    setTimeout(function () { msg.classList.remove('on'); }, 1500);
+  });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function () {
+  fetch('/auth/logout', { method: 'POST', credentials: 'same-origin' })
+    .then(function () { window.location.href = '/'; });
+});
+
+fetch('/api/account', { credentials: 'same-origin' })
+  .then(function (r) { if (!r.ok) throw new Error('not signed in'); return r.json(); })
+  .then(renderAccount)
+  .catch(function () { document.getElementById('signedOut').style.display = 'block'; });
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+<script defer src="/assets/auth-nav.js"></script>
+<script defer src="/assets/bbbmod-player.js"></script>
+
+</body>
+</html>
