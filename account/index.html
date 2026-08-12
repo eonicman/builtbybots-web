@@ -118,6 +118,17 @@
     </div>
   </div>
 
+  <div class="acct-section" id="perksSection" style="display:none">
+    <h2>Patreon Perks</h2>
+    <p style="color:var(--fg2);font-size:.92em;margin-bottom:12px">20% off the Store's digital products — History Kit and the site-exclusive tool — at checkout.</p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <code style="background:var(--card);border:1px solid var(--border);color:var(--glow);padding:8px 14px;border-radius:2px;font-family:var(--mono);font-size:1.05em;letter-spacing:.06em">PATRON20</code>
+      <button class="btn btn-ghost" id="copyPerkCode" type="button">Copy Code</button>
+      <span class="save-msg" id="perkCopyMsg">Copied!</span>
+    </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:10px">Enter it at checkout on the <a href="/store/" style="color:var(--glow)">Store</a> page — look for "Add promotion code" on the Stripe checkout screen.</p>
+  </div>
+
   <div class="acct-section">
     <h2>ROM Wallet</h2>
     <p class="empty-note" id="romWalletNote">Personal file storage for $10+ patrons. Coming soon.</p>
@@ -231,8 +242,17 @@ function renderAccount(data) {
 
   if (data.isPatron) {
     document.getElementById('romWalletNote').textContent = 'Unlocked for your tier — upload/download coming soon.';
+    document.getElementById('perksSection').style.display = 'block';
   }
 }
+
+document.getElementById('copyPerkCode').addEventListener('click', function () {
+  navigator.clipboard.writeText('PATRON20').then(function () {
+    var msg = document.getElementById('perkCopyMsg');
+    msg.classList.add('on');
+    setTimeout(function () { msg.classList.remove('on'); }, 1500);
+  });
+});
 
 function chooseAvatar(id) {
   fetch('/api/account/avatar', {
