@@ -121,6 +121,10 @@
   </table>
   <p>Channels are generic — the player doesn't know or care which one is "drums." This table is just a starting habit, not a rule the format enforces.</p>
 
+  <h3>Combining channels</h3>
+  <p>Only 4 channels, but you're not limited to 4 parts. The <strong>Merge Channel</strong> controls under the grid copy every note from one channel into another — anywhere the destination row is empty — then clear the source channel out, freeing it up for something new. If both channels have notes on the same row, the merge won't guess which one you meant: it's blocked, and the status line tells you exactly which rows conflict so you can clear or move one side first.</p>
+  <p><strong>Undo Merge</strong> reverses the merge you just did, restoring both channels exactly as they were — the way back to a clean channel if you need to pull a part out again to keep working on it. It only remembers the one most recent merge, and only the two channels involved; it's not a general-purpose undo for regular cell edits.</p>
+
   <h3>Sample tips</h3>
   <ul>
     <li><strong>Mono only.</strong> Stereo uploads get downmixed to a single channel automatically (the editor just takes the left channel) — if stereo width matters to your sample, that detail is lost.</li>
@@ -140,7 +144,7 @@
     <li><strong>32 rows, 1 pattern, fixed.</strong> No pattern chaining or song-length beyond one 32-row loop yet.</li>
     <li><strong>No loop points.</strong> The underlying format supports sample loop start/length, but the editor doesn't expose a way to set them — every uploaded sample plays once through per trigger.</li>
     <li><strong>No effect commands.</strong> The format reserves space for them (volume slides, portamento, etc.) but the editor always leaves that field empty. Notes, instrument, and volume are your full toolkit for now.</li>
-    <li><strong>No undo.</strong> Clearing or overwriting a cell is immediate — there's no history to step back through yet.</li>
+    <li><strong>No general undo.</strong> Clearing or overwriting a cell is immediate — there's no history to step back through. The one exception is <strong>Undo Merge</strong>, which reverses the single most recent channel merge (see above).</li>
     <li><strong>Requires a browser with Web Audio API support</strong> (every modern browser has this; nothing to install).</li>
   </ul>
 

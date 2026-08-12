@@ -92,13 +92,20 @@
 
   <div class="tk-panel">
     <h2>Instruments</h2>
-    <div id="instList"><p id="instEmpty">No instruments yet — upload a WAV or MP3 below.</p></div>
-    <div style="margin-top:12px">
+    <div id="instList"><p id="instEmpty">No instruments yet — add a preset below or upload a WAV/MP3.</p></div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select id="presetSelect" style="background:var(--card);border:1px solid var(--border);color:var(--ink);padding:7px 10px;border-radius:2px;font-family:var(--mono);font-size:.85em">
+        <optgroup label="Keyboard"><option value="Piano">Piano</option><option value="Organ">Organ</option><option value="Strings">Strings</option><option value="Brass">Brass</option><option value="Flute">Flute</option><option value="Bell">Bell</option></optgroup>
+        <optgroup label="Tracker"><option value="Bass">Bass</option><option value="Sub">Sub Bass</option><option value="Lead">Lead (pulse)</option><option value="SawLead">Lead (saw)</option><option value="Pad">Pad</option></optgroup>
+        <optgroup label="Drums"><option value="Kick">Kick</option><option value="Snare">Snare</option><option value="Hihat">Hihat</option><option value="Clap">Clap</option><option value="Tom">Tom</option></optgroup>
+      </select>
+      <button class="btn btn-ghost" id="btnAddPreset" type="button">+ Add Preset Instrument</button>
       <label class="btn btn-ghost" style="cursor:pointer;display:inline-block">
         Upload Sample
         <input type="file" id="sampleUpload" accept="audio/wav,audio/mpeg,audio/mp3" style="display:none">
       </label>
     </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:8px">Presets are classic keyboard/tracker-style sounds, synthesized instantly — no file needed. Same instruments the two official tracks (Canon in D, Für Elise) and Boot Sequence are built from.</p>
   </div>
 
   <div class="tk-panel">
@@ -114,6 +121,14 @@
       <button class="btn btn-ghost" id="editClear">Clear Cell</button>
     </div>
     <p style="color:var(--fg3);font-size:.8em;margin-top:10px">Click a cell to select it (arrow keys also move the selection), then use the controls above to set or clear it.</p>
+
+    <div class="edit-panel" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="tk-field"><label>Merge Channel</label><select id="mergeFrom"></select></div>
+      <div class="tk-field"><label>Into Channel</label><select id="mergeInto"></select></div>
+      <button class="btn btn-ghost" id="btnMergeChannel">⇥ Merge Channel</button>
+      <button class="btn btn-ghost" id="btnUndoMerge" disabled>↺ Undo Merge</button>
+    </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:8px">Merging copies every note from one channel into the other (wherever the destination row is empty), then clears the source channel out — a quick way to free up a channel for a new part once all 4 are in use. If both channels have notes on the same row, the merge is blocked and tells you which rows conflict. <strong>Undo Merge</strong> reverses only the most recent merge, restoring both channels exactly as they were — handy if you need to pull a part back out onto its own channel to adjust it.</p>
   </div>
 
   <div class="tk-actions">
@@ -135,6 +150,7 @@
 </div></footer>
 
 <script src="/assets/bbbmod-player.js"></script>
+<script src="/assets/preset-synth.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -300,6 +316,26 @@ document.getElementById('sampleUpload').addEventListener('change', async (e) => 
   e.target.value = '';
 });
 
+// --- Preset instrument picker: synthesizes instantly via preset-synth.js,
+// no upload needed. Pushes the same { name, audioBuffer, volume } shape as
+// the upload path, so everything downstream (grid, encoder, preview,
+// publish) treats presets and uploads identically.
+document.getElementById('btnAddPreset').addEventListener('click', () => {
+  const name = document.getElementById('presetSelect').value;
+  const factory = window.BBBPresetSynth && window.BBBPresetSynth.presets[name];
+  if (!factory) { setStatus('Preset library not loaded — try refreshing.', 'error'); return; }
+  const preset = factory();
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioBuffer = ctx.createBuffer(1, preset.samples.length, window.BBBPresetSynth.SR);
+  audioBuffer.getChannelData(0).set(preset.samples);
+  // De-dupe the display name if this preset's already been added once.
+  const existingCount = state.instruments.filter(i => i.name === preset.name || i.name.startsWith(preset.name + ' ')).length;
+  const dispName = existingCount === 0 ? preset.name : `${preset.name} ${existingCount + 1}`;
+  state.instruments.push({ name: dispName, audioBuffer, volume: preset.volume });
+  renderInstruments();
+  setStatus(`Added preset "${dispName}" as instrument ${state.instruments.length}`, 'ok');
+});
+
 // --- Pattern grid UI ---
 function renderGrid() {
   const table = document.getElementById('pgrid');
@@ -349,6 +385,81 @@ document.getElementById('editClear').addEventListener('click', () => {
   renderGrid();
   syncEditPanel();
 });
+// --- Channel merge / undo-merge ---
+function populateChannelSelects() {
+  ['mergeFrom', 'mergeInto'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    for (let ch = 0; ch < CHANNELS; ch++) {
+      const opt = document.createElement('option');
+      opt.value = ch;
+      opt.textContent = `Ch ${ch + 1}`;
+      sel.appendChild(opt);
+    }
+  });
+  document.getElementById('mergeInto').value = Math.min(1, CHANNELS - 1);
+}
+populateChannelSelects();
+
+function getChannelCells(ch) {
+  const out = new Uint8Array(ROWS * 5);
+  for (let row = 0; row < ROWS; row++) {
+    const off = cellOffset(row, ch);
+    out.set(state.cells.subarray(off, off + 5), row * 5);
+  }
+  return out;
+}
+function setChannelCells(ch, data) {
+  for (let row = 0; row < ROWS; row++) {
+    const off = cellOffset(row, ch);
+    state.cells.set(data.subarray(row * 5, row * 5 + 5), off);
+  }
+}
+
+let lastMerge = null;
+
+document.getElementById('btnMergeChannel').addEventListener('click', () => {
+  const fromCh = parseInt(document.getElementById('mergeFrom').value, 10);
+  const intoCh = parseInt(document.getElementById('mergeInto').value, 10);
+  if (fromCh === intoCh) { setStatus('Pick two different channels to merge.', 'error'); return; }
+
+  const conflicts = [];
+  for (let row = 0; row < ROWS; row++) {
+    const fOff = cellOffset(row, fromCh), iOff = cellOffset(row, intoCh);
+    if (state.cells[fOff] !== 0 && state.cells[iOff] !== 0) conflicts.push(row + 1);
+  }
+  if (conflicts.length) {
+    setStatus(`Can't merge — Ch ${fromCh + 1} and Ch ${intoCh + 1} both have notes on row(s) ${conflicts.join(', ')}. Clear or move one side on those rows first.`, 'error');
+    return;
+  }
+
+  lastMerge = { fromCh, intoCh, fromBefore: getChannelCells(fromCh), intoBefore: getChannelCells(intoCh) };
+  for (let row = 0; row < ROWS; row++) {
+    const fOff = cellOffset(row, fromCh);
+    if (state.cells[fOff] !== 0) {
+      const iOff = cellOffset(row, intoCh);
+      state.cells.set(state.cells.subarray(fOff, fOff + 5), iOff);
+      state.cells.set([0, 0, 0, 0, 0], fOff);
+    }
+  }
+  document.getElementById('btnUndoMerge').disabled = false;
+  renderGrid();
+  syncEditPanel();
+  setStatus(`Merged Ch ${fromCh + 1} into Ch ${intoCh + 1} — Ch ${fromCh + 1} is now empty and ready for a new part.`, 'ok');
+});
+
+document.getElementById('btnUndoMerge').addEventListener('click', () => {
+  if (!lastMerge) return;
+  const { fromCh, intoCh, fromBefore, intoBefore } = lastMerge;
+  setChannelCells(fromCh, fromBefore);
+  setChannelCells(intoCh, intoBefore);
+  lastMerge = null;
+  document.getElementById('btnUndoMerge').disabled = true;
+  renderGrid();
+  syncEditPanel();
+  setStatus(`Undid the merge of Ch ${fromCh + 1} into Ch ${intoCh + 1}.`, 'ok');
+});
+
 document.addEventListener('keydown', (e) => {
   if (document.activeElement && ['INPUT', 'SELECT'].includes(document.activeElement.tagName)) return;
   let { row, ch } = selected;
