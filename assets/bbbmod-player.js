@@ -92,6 +92,71 @@ function instrumentToAudioBuffer(ctx, inst) {
   return buf;
 }
 
+// Track-level effects. Keep these IDs in sync with EFFECT_NAMES/
+// EFFECT_LETTERS in tracker/index.html -- that's where they're written into
+// cells; this is where they're interpreted at playback time. effect 0 or a
+// missing effect byte (v01 files, or files written before this shipped)
+// falls through to "play the note plain," so nothing old breaks.
+function makeDistortionCurve(amount) {
+  const n = 44100;
+  const curve = new Float32Array(n);
+  const deg = Math.PI / 180;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+  }
+  return curve;
+}
+
+// Returns the node downstream code should connect onward from. Effects that
+// don't need an insert node in the chain (vibrato modulates src.detune
+// directly) just return src unchanged.
+function applyNoteEffect(ctx, src, effect, param, startTime, noteDuration) {
+  if (!effect) return src;
+  const amt = param / 255;
+  if (amt === 0) return src; // a type is set but intensity is 0 -- no audible effect, by design
+
+  if (effect === 1) { // Low-pass filter -- higher intensity = darker
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 12000 - amt * 11000;
+    src.connect(filter);
+    return filter;
+  }
+  if (effect === 2) { // Delay / echo
+    const delay = ctx.createDelay(1.0);
+    delay.delayTime.value = 0.18;
+    const feedback = ctx.createGain();
+    feedback.gain.value = amt * 0.6; // capped well under 1 so the feedback loop always decays
+    const wet = ctx.createGain();
+    wet.gain.value = amt * 0.5;
+    const mixOut = ctx.createGain();
+    src.connect(mixOut); // dry
+    src.connect(delay);
+    delay.connect(feedback).connect(delay);
+    delay.connect(wet).connect(mixOut);
+    return mixOut;
+  }
+  if (effect === 3) { // Distortion
+    const shaper = ctx.createWaveShaper();
+    shaper.curve = makeDistortionCurve(1 + amt * 39);
+    shaper.oversample = '2x';
+    src.connect(shaper);
+    return shaper;
+  }
+  if (effect === 4) { // Vibrato -- LFO modulating pitch via detune (cents)
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 5.5;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = amt * 40;
+    lfo.connect(lfoGain).connect(src.detune);
+    lfo.start(startTime);
+    lfo.stop(startTime + noteDuration + 0.1);
+    return src;
+  }
+  return src;
+}
+
 class BBBModPlayer {
   constructor() {
     this.ctx = null;
@@ -104,16 +169,26 @@ class BBBModPlayer {
     this.stopTimer = null;
   }
 
-  async load(url) {
-    const resp = await fetch(url);
-    const buf = await resp.arrayBuffer();
-    this.song = decodeBBBMOD(buf);
+  // Creates the AudioContext + analyser bus on first use. Callers that
+  // build a song/audioBuffers themselves instead of going through load()
+  // (the Tracker's Preview button does this) must call this directly --
+  // skipping it leaves this.analyser null and every note's connect() call
+  // throws.
+  ensureContext() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
       this.analyser = this.ctx.createAnalyser();
       this.analyser.fftSize = 64;
       this.analyser.connect(this.ctx.destination);
     }
+    return this.ctx;
+  }
+
+  async load(url) {
+    const resp = await fetch(url);
+    const buf = await resp.arrayBuffer();
+    this.song = decodeBBBMOD(buf);
+    this.ensureContext();
     this.audioBuffers = this.song.instruments.map(inst => instrumentToAudioBuffer(this.ctx, inst));
     return this.song;
   }
@@ -134,6 +209,8 @@ class BBBModPlayer {
           const note = pattern.cells[cellOff];
           const instrumentIdx = pattern.cells[cellOff + 1];
           const volume = pattern.cells[cellOff + 2];
+          const effect = pattern.cells[cellOff + 3];
+          const effectParam = pattern.cells[cellOff + 4];
           if (note > 0 && instrumentIdx > 0 && this.audioBuffers[instrumentIdx - 1]) {
             const semitoneOffset = (note - 1) - 48;
             const playbackRate = Math.pow(2, semitoneOffset / 12);
@@ -142,7 +219,9 @@ class BBBModPlayer {
             src.playbackRate.value = playbackRate;
             const gain = this.ctx.createGain();
             gain.gain.value = Math.min(1, volume / 64);
-            src.connect(gain).connect(this.analyser);
+            const noteDuration = src.buffer.duration / playbackRate;
+            const outputNode = applyNoteEffect(this.ctx, src, effect, effectParam, t, noteDuration);
+            outputNode.connect(gain).connect(this.analyser);
             src.start(t);
             this.scheduledSources.push(src);
           }

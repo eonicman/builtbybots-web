@@ -100,7 +100,7 @@
   <h2 id="advanced">Advanced Guide</h2>
 
   <h3>How a cell works</h3>
-  <p>Each of the 32×4 grid cells holds three things you control — Note, Instrument, Volume — plus two reserved-for-later fields (effect slots) the editor always leaves blank for now. A cell showing <code>···</code> is empty: nothing plays there. An empty cell in the middle of a held note is fine — the instrument's own sample decides how long the sound actually rings out; the grid just controls when new notes start.</p>
+  <p>Each of the 32×4 grid cells holds five things — Note, Instrument, Volume, Effect, and an Effect Intensity byte. The first three you set directly per cell; the last two you set per <em>channel</em> via the Track effects controls (see above), which then write that same value into every affected cell — see Combining channels and Track effects above for how the editor uses them. A cell showing <code>···</code> is empty: nothing plays there. An empty cell in the middle of a held note is fine — the instrument's own sample decides how long the sound actually rings out; the grid just controls when new notes start.</p>
 
   <h3>Notes, octaves, and "unison"</h3>
   <p>When you upload a sample, the Tracker doesn't know what pitch it "is" — there's no auto-detection. Whatever pitch you hear when you upload it is treated as <strong>C4</strong> (called "unison" in tracker terms). Every other note you pick in the editor is that same sample sped up or slowed down to reach a different pitch — C5 plays it an octave faster, C3 an octave slower, and so on down to G2 and up to B6 (the dropdown's full range). This means a drum sample doesn't really have a "correct" note — C4 keeps its recorded pitch, anything else changes its character too (a snare pitched way down starts sounding like a tom).</p>
@@ -125,11 +125,19 @@
   <p>Only 4 channels, but you're not limited to 4 parts. The <strong>Merge Channel</strong> controls under the grid copy every note from one channel into another — anywhere the destination row is empty — then clear the source channel out, freeing it up for something new. If both channels have notes on the same row, the merge won't guess which one you meant: it's blocked, and the status line tells you exactly which rows conflict so you can clear or move one side first.</p>
   <p><strong>Undo Merge</strong> reverses the merge you just did, restoring both channels exactly as they were — the way back to a clean channel if you need to pull a part out again to keep working on it. It only remembers the one most recent merge, and only the two channels involved; it's not a general-purpose undo for regular cell edits.</p>
 
+  <h3>Recording samples</h3>
+  <p><strong>Record Sample</strong>, next to Upload Sample, asks for microphone access and records straight into the editor — sing, hum, or play something into your mic and it becomes an instrument exactly like an upload, no separate export/import step. Recording is capped at 15 seconds (hit Stop earlier if you're done sooner) and the editor automatically trims silence off both ends before adding it to your instrument list, so a slow start or a long tail before you hit Stop won't throw off when the note actually triggers. If your browser denies mic access, the status line explains why instead of failing silently.</p>
+
+  <h3>Track effects</h3>
+  <p>The <strong>Channel / Effect / Intensity</strong> controls under Merge Channel apply an effect to an entire channel at once, not one cell at a time — pick a channel, pick an effect, set an intensity from 0–100, and hit <strong>Apply to Channel</strong>. Every note already in that channel gets stamped with it immediately, and any note you add to that channel afterward picks it up automatically, until you change the channel's effect again. A cell carrying an active effect shows a letter after its note/instrument/volume (F/D/X/V) so you can see it at a glance.</p>
+  <p>Four effects, each scaling from subtle to strong as intensity rises: <strong>Low-pass Filter</strong> (F) darkens the tone — higher intensity cuts more high end. <strong>Delay / Echo</strong> (D) adds a slapback repeat with feedback. <strong>Distortion</strong> (X) adds grit and harmonics. <strong>Vibrato</strong> (V) wobbles the pitch with a gentle LFO. Intensity 0 means no audible effect even with a type selected — that's the same as leaving it on None.</p>
+  <p>This is genuinely per-track, not a disguised per-cell feature you have to reapply constantly: set it once for a channel and forget it. Under the hood it does write the same effect+intensity value into every affected cell, since that's what the <code>.bbbmod</code> format actually stores — <a href="#advanced">see below</a> — but the editor's UI and the workflow both treat it as a channel-level setting.</p>
+
   <h3>Sample tips</h3>
   <ul>
     <li><strong>Mono only.</strong> Stereo uploads get downmixed to a single channel automatically (the editor just takes the left channel) — if stereo width matters to your sample, that detail is lost.</li>
     <li><strong>Short samples read as "hits," long samples read as "held notes."</strong> A quarter-second drum hit and a 2-second pad behave very differently once pitched and retriggered across a pattern — if something sounds muddy, try a shorter sample first.</li>
-    <li><strong>Trim silence before uploading.</strong> The editor doesn't trim for you — a sample with a half-second of silence at the start will sound "late" every time it triggers.</li>
+    <li><strong>Trim silence before uploading.</strong> Uploads aren't auto-trimmed — a sample with a half-second of silence at the start will sound "late" every time it triggers. (Recorded samples <em>are</em> auto-trimmed — see Recording samples above.)</li>
     <li><strong>Volume is 0–64, not 0–100 or 0–1.</strong> That's the classic tracker scale — 64 is full volume for that cell, not a percentage.</li>
   </ul>
 
@@ -143,7 +151,7 @@
   <ul>
     <li><strong>32 rows, 1 pattern, fixed.</strong> No pattern chaining or song-length beyond one 32-row loop yet.</li>
     <li><strong>No loop points.</strong> The underlying format supports sample loop start/length, but the editor doesn't expose a way to set them — every uploaded sample plays once through per trigger.</li>
-    <li><strong>No effect commands.</strong> The format reserves space for them (volume slides, portamento, etc.) but the editor always leaves that field empty. Notes, instrument, and volume are your full toolkit for now.</li>
+    <li><strong>Effects are per-track, not per-cell.</strong> The format reserves a per-cell effect+intensity byte pair, but the editor only exposes it as a channel-wide setting (see Track effects above) — you can't give two notes in the same channel different effects yet.</li>
     <li><strong>No general undo.</strong> Clearing or overwriting a cell is immediate — there's no history to step back through. The one exception is <strong>Undo Merge</strong>, which reverses the single most recent channel merge (see above).</li>
     <li><strong>Requires a browser with Web Audio API support</strong> (every modern browser has this; nothing to install).</li>
   </ul>

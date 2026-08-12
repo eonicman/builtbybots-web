@@ -104,8 +104,13 @@
         Upload Sample
         <input type="file" id="sampleUpload" accept="audio/wav,audio/mpeg,audio/mp3" style="display:none">
       </label>
+      <button class="btn btn-ghost" id="btnRecordSample" type="button">&#127908; Record Sample</button>
     </div>
-    <p style="color:var(--fg3);font-size:.8em;margin-top:8px">Presets are classic keyboard/tracker-style sounds, synthesized instantly — no file needed. Same instruments the two official tracks (Canon in D, Für Elise) and Boot Sequence are built from.</p>
+    <div id="recordControls" style="display:none;align-items:center;gap:10px;margin-top:10px">
+      <span style="color:#e05b5b;font-family:var(--mono);font-size:.85em">&#9679; Recording&hellip; <span id="recordTime">0.0s</span></span>
+      <button class="btn btn-ghost" id="btnStopRecord" type="button">Stop</button>
+    </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:8px">Presets are classic keyboard/tracker-style sounds, synthesized instantly — no file needed. Same instruments the two official tracks (Canon in D, Für Elise) and Boot Sequence are built from. Recording asks for mic access, caps at 15s, and auto-trims leading/trailing silence — sing or play something and it becomes an instrument like any other.</p>
   </div>
 
   <div class="tk-panel">
@@ -129,6 +134,22 @@
       <button class="btn btn-ghost" id="btnUndoMerge" disabled>↺ Undo Merge</button>
     </div>
     <p style="color:var(--fg3);font-size:.8em;margin-top:8px">Merging copies every note from one channel into the other (wherever the destination row is empty), then clears the source channel out — a quick way to free up a channel for a new part once all 4 are in use. If both channels have notes on the same row, the merge is blocked and tells you which rows conflict. <strong>Undo Merge</strong> reverses only the most recent merge, restoring both channels exactly as they were — handy if you need to pull a part back out onto its own channel to adjust it.</p>
+
+    <div class="edit-panel" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="tk-field"><label>Channel</label><select id="fxChannel"></select></div>
+      <div class="tk-field"><label>Effect</label>
+        <select id="fxType">
+          <option value="0">None</option>
+          <option value="1">Low-pass Filter</option>
+          <option value="2">Delay / Echo</option>
+          <option value="3">Distortion</option>
+          <option value="4">Vibrato</option>
+        </select>
+      </div>
+      <div class="tk-field"><label>Intensity (0-100)</label><input type="number" id="fxAmount" min="0" max="100" value="0" style="width:70px"></div>
+      <button class="btn btn-ghost" id="btnApplyFx">Apply to Channel</button>
+    </div>
+    <p style="color:var(--fg3);font-size:.8em;margin-top:8px">A track-level effect, not per-cell: pick a channel and an effect and it's stamped onto every note already in that channel, plus any note you add to it afterward, until you change it again. Intensity 0 means no audible effect even with a type selected. Cells carrying an active effect show a letter after the note (F/D/X/V).</p>
   </div>
 
   <div class="tk-actions">
@@ -218,6 +239,17 @@ const CHANNELS = 4;
 const ROWS = 32;
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
+// Track-level effects. The .bbbmod format reserves effect+effectParam per
+// cell (see cellOffset), but the editor treats them as a per-channel
+// setting -- picking an effect for a channel stamps the same effect/param
+// onto every note already there, and onto any note added afterward, so it
+// reads and plays back as "this track has an effect," not per-note tweaking.
+// effectParam is always 0-255 intensity; 0 means no audible effect even
+// with a type selected. Playback interpretation lives in bbbmod-player.js
+// (applyNoteEffect) -- keep the effect IDs in sync with that file.
+const EFFECT_NAMES = ['None', 'Low-pass Filter', 'Delay / Echo', 'Distortion', 'Vibrato'];
+const EFFECT_LETTERS = ['', 'F', 'D', 'X', 'V'];
+
 // note byte <-> note name, matching the encoding pinned down in Phase 1:
 // byte 0 = empty, byte 49 = "C-4" (unison / the pitch a sample was
 // recorded at), each semitone step +/-1 byte.
@@ -242,6 +274,7 @@ function noteNameToByte(name) {
 const state = {
   instruments: [], // { name, audioBuffer, volume }
   cells: new Uint8Array(ROWS * CHANNELS * 5), // note, instrument, volume, effect, effectParam
+  channelEffects: Array.from({ length: CHANNELS }, () => ({ effect: 0, param: 0 })),
 };
 let selected = { row: 0, ch: 0 };
 
@@ -316,6 +349,79 @@ document.getElementById('sampleUpload').addEventListener('change', async (e) => 
   e.target.value = '';
 });
 
+// --- Mic recording: sing or play something and it becomes an instrument,
+// pushing the same { name, audioBuffer, volume } shape uploads/presets use.
+// Trims leading/trailing silence so the recorded note doesn't trigger late
+// (same reason the guide tells upload users to trim their own samples).
+function trimSilence(ctx, audioBuffer, thresholdDb) {
+  const threshold = Math.pow(10, (thresholdDb ?? -50) / 20);
+  const data = audioBuffer.getChannelData(0);
+  let start = 0, end = data.length - 1;
+  while (start < data.length && Math.abs(data[start]) < threshold) start++;
+  while (end > start && Math.abs(data[end]) < threshold) end--;
+  const pad = Math.round(audioBuffer.sampleRate * 0.02); // 20ms, avoid clipping the attack/release
+  start = Math.max(0, start - pad);
+  end = Math.min(data.length - 1, end + pad);
+  if (end <= start) return audioBuffer; // all silence -- bail rather than produce an empty buffer
+  const trimmed = ctx.createBuffer(audioBuffer.numberOfChannels, end - start + 1, audioBuffer.sampleRate);
+  for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+    trimmed.getChannelData(ch).set(audioBuffer.getChannelData(ch).subarray(start, end + 1));
+  }
+  return trimmed;
+}
+
+const RECORD_MAX_SECONDS = 15;
+let activeRecorder = null;
+let recordedChunks = [];
+let recordTimerInterval = null;
+
+document.getElementById('btnRecordSample').addEventListener('click', async () => {
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    setStatus('Could not access the microphone: ' + err.message, 'error');
+    return;
+  }
+  recordedChunks = [];
+  activeRecorder = new MediaRecorder(stream);
+  activeRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  activeRecorder.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    clearInterval(recordTimerInterval);
+    document.getElementById('recordControls').style.display = 'none';
+    document.getElementById('btnRecordSample').disabled = false;
+
+    const blob = new Blob(recordedChunks, { type: activeRecorder.mimeType || 'audio/webm' });
+    const arrayBuf = await blob.arrayBuffer();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    try {
+      const raw = await ctx.decodeAudioData(arrayBuf);
+      const audioBuffer = trimSilence(ctx, raw);
+      const n = state.instruments.filter(i => i.name.startsWith('Recording')).length;
+      const name = `Recording ${n + 1}`;
+      state.instruments.push({ name, audioBuffer, volume: 64 });
+      renderInstruments();
+      setStatus(`Recorded "${name}" (${audioBuffer.duration.toFixed(2)}s) as instrument ${state.instruments.length}.`, 'ok');
+    } catch (err) {
+      setStatus('Could not process the recording: ' + err.message, 'error');
+    }
+  };
+  activeRecorder.start();
+  const startedAt = performance.now();
+  document.getElementById('recordControls').style.display = 'flex';
+  document.getElementById('btnRecordSample').disabled = true;
+  recordTimerInterval = setInterval(() => {
+    const secs = (performance.now() - startedAt) / 1000;
+    document.getElementById('recordTime').textContent = secs.toFixed(1) + 's';
+    if (secs >= RECORD_MAX_SECONDS) activeRecorder.stop();
+  }, 100);
+});
+
+document.getElementById('btnStopRecord').addEventListener('click', () => {
+  if (activeRecorder && activeRecorder.state === 'recording') activeRecorder.stop();
+});
+
 // --- Preset instrument picker: synthesizes instantly via preset-synth.js,
 // no upload needed. Pushes the same { name, audioBuffer, volume } shape as
 // the upload path, so everything downstream (grid, encoder, preview,
@@ -349,7 +455,9 @@ function renderGrid() {
       const note = state.cells[off];
       const inst = state.cells[off + 1];
       const vol = state.cells[off + 2];
-      const text = note === 0 ? '···' : `${noteByteToName(note)} ${String(inst).padStart(2, '0')} ${String(vol).padStart(2, '0')}`;
+      const fx = state.cells[off + 3];
+      const fxSuffix = (note !== 0 && fx) ? ' ' + EFFECT_LETTERS[fx] : '';
+      const text = note === 0 ? '···' : `${noteByteToName(note)} ${String(inst).padStart(2, '0')} ${String(vol).padStart(2, '0')}${fxSuffix}`;
       const sel = (row === selected.row && ch === selected.ch) ? ' selected' : '';
       html += `<td class="cell${sel}" data-row="${row}" data-ch="${ch}">${text}</td>`;
     }
@@ -374,20 +482,28 @@ function syncEditPanel() {
 
 document.getElementById('editApply').addEventListener('click', () => {
   const off = cellOffset(selected.row, selected.ch);
-  state.cells[off] = parseInt(document.getElementById('editNote').value, 10);
+  const note = parseInt(document.getElementById('editNote').value, 10);
+  state.cells[off] = note;
   state.cells[off + 1] = parseInt(document.getElementById('editInst').value, 10);
   state.cells[off + 2] = parseInt(document.getElementById('editVol').value, 10) || 0;
+  // New/edited notes pick up their channel's current track-level effect
+  // automatically -- that's what makes it read as "per track" rather than
+  // something you have to reapply after every edit.
+  const fx = state.channelEffects[selected.ch];
+  state.cells[off + 3] = note !== 0 ? fx.effect : 0;
+  state.cells[off + 4] = note !== 0 ? fx.param : 0;
   renderGrid();
 });
 document.getElementById('editClear').addEventListener('click', () => {
   const off = cellOffset(selected.row, selected.ch);
   state.cells[off] = 0; state.cells[off + 1] = 0; state.cells[off + 2] = 0;
+  state.cells[off + 3] = 0; state.cells[off + 4] = 0;
   renderGrid();
   syncEditPanel();
 });
 // --- Channel merge / undo-merge ---
 function populateChannelSelects() {
-  ['mergeFrom', 'mergeInto'].forEach(id => {
+  ['mergeFrom', 'mergeInto', 'fxChannel'].forEach(id => {
     const sel = document.getElementById(id);
     sel.innerHTML = '';
     for (let ch = 0; ch < CHANNELS; ch++) {
@@ -400,6 +516,33 @@ function populateChannelSelects() {
   document.getElementById('mergeInto').value = Math.min(1, CHANNELS - 1);
 }
 populateChannelSelects();
+
+// --- Channel (track-level) effects ---
+function syncFxPanel() {
+  const ch = parseInt(document.getElementById('fxChannel').value, 10);
+  const fx = state.channelEffects[ch];
+  document.getElementById('fxType').value = fx.effect;
+  document.getElementById('fxAmount').value = Math.round((fx.param / 255) * 100);
+}
+syncFxPanel();
+document.getElementById('fxChannel').addEventListener('change', syncFxPanel);
+
+document.getElementById('btnApplyFx').addEventListener('click', () => {
+  const ch = parseInt(document.getElementById('fxChannel').value, 10);
+  const effect = parseInt(document.getElementById('fxType').value, 10);
+  const amountUI = Math.max(0, Math.min(100, parseInt(document.getElementById('fxAmount').value, 10) || 0));
+  const param = Math.round((amountUI / 100) * 255);
+  state.channelEffects[ch] = { effect, param };
+  for (let row = 0; row < ROWS; row++) {
+    const off = cellOffset(row, ch);
+    if (state.cells[off] !== 0) {
+      state.cells[off + 3] = effect;
+      state.cells[off + 4] = param;
+    }
+  }
+  renderGrid();
+  setStatus(`Ch ${ch + 1} set to ${EFFECT_NAMES[effect]} at ${amountUI}%.`, 'ok');
+});
 
 function getChannelCells(ch) {
   const out = new Uint8Array(ROWS * 5);
@@ -557,7 +700,7 @@ document.getElementById('btnPreview').addEventListener('click', () => {
     const buf = encodeBBBMOD();
     const song = decodeBBBMOD(buf); // round-trips through the real decoder -- proves encoder correctness every time
     if (!previewPlayer) previewPlayer = new BBBModPlayer();
-    previewPlayer.ctx = previewPlayer.ctx || new (window.AudioContext || window.webkitAudioContext)();
+    previewPlayer.ensureContext();
     previewPlayer.song = song;
     previewPlayer.audioBuffers = song.instruments.map(inst => instrumentToAudioBuffer(previewPlayer.ctx, inst));
     previewPlayer.play();
