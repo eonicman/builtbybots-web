@@ -129,6 +129,33 @@
     color: #a89868; letter-spacing: 2px; margin-left: auto;
     text-shadow: 0 0 8px rgba(168,152,104,0.2);
   }
+  /* Functional knob-styled controls: mute + volume + shuffle/autoplay */
+  .tv-mute-btn {
+    width: 28px; height: 28px; border-radius: 50%; flex: 0 0 auto;
+    background: radial-gradient(circle at 30% 30%, #7a6a4a, #3a2a10);
+    border: 1px solid #5a4a2a; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,220,150,0.15);
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+    padding: 0; transition: box-shadow .15s;
+  }
+  .tv-mute-btn.muted { box-shadow: 0 0 0 2px rgba(220,80,80,.5), inset 0 1px 1px rgba(255,220,150,0.15); }
+  .tv-vol-wrap { display: flex; align-items: center; }
+  .tv-volume {
+    width: 64px; height: 3px; accent-color: var(--glow); cursor: pointer;
+    background: #3a2a10;
+  }
+  .tv-shuffle-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: #8a7a5a; background: transparent; border: 1px solid #5a4a2a; border-radius: 3px;
+    padding: 5px 9px; cursor: pointer; transition: color .15s, border-color .15s, box-shadow .15s;
+    display: flex; align-items: center; gap: 5px; flex: 0 0 auto;
+  }
+  .tv-shuffle-btn:hover { color: #a89868; border-color: #8a7a5a; }
+  .tv-shuffle-btn.active {
+    color: var(--glow); border-color: var(--glow);
+    box-shadow: 0 0 10px rgba(53,243,154,0.25);
+    text-shadow: 0 0 6px rgba(53,243,154,0.4);
+  }
   .tv-wood-grain {
     position: absolute; top: 0; left: 0; right: 0; height: 8px;
     background: linear-gradient(90deg, #6a4a2a, #7a5a3a, #6a4a2a, #5a3a1a, #7a5a3a, #6a4a2a);
@@ -222,14 +249,18 @@
             <div class="dot"></div>
             <div class="label">CLICK TO TURN ON</div>
           </div>
-          <iframe id="tv-iframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <div id="tv-player"></div>
         </div>
       </div>
       <div class="tv-controls">
-        <div class="tv-knob"></div>
-        <div class="tv-knob"></div>
-        <div class="tv-label">CH</div>
+        <button class="tv-mute-btn" id="tv-mute-btn" type="button" title="Mute / unmute" aria-label="Mute">🔊</button>
+        <div class="tv-vol-wrap">
+          <input type="range" id="tv-volume" class="tv-volume" min="0" max="100" value="70" aria-label="Volume">
+        </div>
         <div class="tv-label">VOL</div>
+        <button class="tv-shuffle-btn" id="tv-shuffle-btn" type="button" aria-pressed="false" title="Auto-play a random episode on this channel when the current one ends">
+          🔀 <span>Autoplay</span>
+        </button>
         <div class="tv-brand">AMIGA-VISION</div>
       </div>
     </div>
@@ -359,12 +390,90 @@ let selectedType = null;    // currently selected channel (type key)
 let currentEpisodes = [];   // channels[] filtered to selectedType, newest first
 let currentIdx = -1;        // index within currentEpisodes
 let tvOn = false;
-const iframe = document.getElementById('tv-iframe');
+let shuffleOn = false;
 const tvOff = document.getElementById('tv-off');
 const tvStatic = document.getElementById('tv-static');
 const staticCtx = tvStatic.getContext('2d');
 const npTitle = document.getElementById('np-title');
 const npMeta = document.getElementById('np-meta');
+const muteBtn = document.getElementById('tv-mute-btn');
+const volumeSlider = document.getElementById('tv-volume');
+const shuffleBtn = document.getElementById('tv-shuffle-btn');
+
+// ═══ YouTube IFrame Player API — real player object (not a bare <iframe
+// src=...>) so volume/mute can be controlled and "ended" can be detected
+// for the autoplay randomizer. #tv-player starts as an empty <div>; the
+// API replaces it in place with its own iframe on first tuneTo(). ═══
+let ytPlayer = null;
+let ytApiReady = false;
+let pendingVideoId = null;
+const rawSavedVolume = localStorage.getItem('bbb-shows-volume');
+const savedVolume = rawSavedVolume === null ? NaN : Number(rawSavedVolume);
+const initialVolume = Number.isFinite(savedVolume) && savedVolume >= 0 && savedVolume <= 100 ? savedVolume : 70;
+volumeSlider.value = initialVolume;
+const savedMuted = localStorage.getItem('bbb-shows-muted') === '1';
+setMuteUi(savedMuted);
+
+function loadYouTubeApi() {
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+}
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  if (pendingVideoId) { createPlayer(pendingVideoId); pendingVideoId = null; }
+};
+loadYouTubeApi();
+
+function createPlayer(videoId) {
+  ytPlayer = new YT.Player('tv-player', {
+    videoId,
+    playerVars: { autoplay: 1, rel: 0 },
+    events: {
+      onReady: (e) => {
+        e.target.setVolume(initialVolume);
+        if (savedMuted) { e.target.mute(); setMuteUi(true); }
+      },
+      onStateChange: onPlayerStateChange,
+    },
+  });
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.ENDED && shuffleOn && currentEpisodes.length > 1) {
+    let next;
+    do { next = Math.floor(Math.random() * currentEpisodes.length); } while (next === currentIdx);
+    tuneTo(next);
+  }
+}
+
+function setMuteUi(muted) {
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+  muteBtn.classList.toggle('muted', muted);
+  muteBtn.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
+}
+
+muteBtn.onclick = () => {
+  if (!ytPlayer || !ytPlayer.isMuted) return;
+  const nowMuted = !ytPlayer.isMuted();
+  nowMuted ? ytPlayer.mute() : ytPlayer.unMute();
+  setMuteUi(nowMuted);
+  localStorage.setItem('bbb-shows-muted', nowMuted ? '1' : '0');
+};
+
+volumeSlider.oninput = (e) => {
+  const v = Number(e.target.value);
+  localStorage.setItem('bbb-shows-volume', String(v));
+  if (!ytPlayer || !ytPlayer.setVolume) return;
+  ytPlayer.setVolume(v);
+  if (v > 0 && ytPlayer.isMuted && ytPlayer.isMuted()) { ytPlayer.unMute(); setMuteUi(false); }
+};
+
+shuffleBtn.onclick = () => {
+  shuffleOn = !shuffleOn;
+  shuffleBtn.classList.toggle('active', shuffleOn);
+  shuffleBtn.setAttribute('aria-pressed', String(shuffleOn));
+};
 
 const channelPicker = document.getElementById('channel-picker');
 const channelToggle = document.getElementById('channel-toggle');
@@ -504,7 +613,9 @@ function tuneTo(idx) {
   const ep = currentEpisodes[idx];
   showStatic(400);
   setTimeout(() => {
-    iframe.src = `https://www.youtube.com/embed/${ep.id}?autoplay=1&rel=0`;
+    if (!ytApiReady) { pendingVideoId = ep.id; }
+    else if (!ytPlayer) { createPlayer(ep.id); }
+    else { ytPlayer.loadVideoById(ep.id); }
     npTitle.textContent = ep.title;
     npMeta.textContent = metaFor(ep);
   }, 200);
