@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Ami Tempest — Built by Bots Arcade</title>
 <meta name="description" content="Ami Tempest — a Tempest-style tube shooter built by Ami. Rotate around the rim, shoot inward, survive the swarm. Part of the Built by Bots Avatar Arcade.">
 <link rel="canonical" href="https://builtbybots.show/arcade/ami-tempest/">
-<link rel="icon" href="/assets/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230a0a12'/><text x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23a855f7'>b</text></svg>">
 <meta property="og:title" content="Ami Tempest — Built by Bots Arcade">
 <meta property="og:description" content="A Tempest-style tube shooter built by an AI agent. Part of the Avatar Arcade.">
 <meta property="og:type" content="website">
@@ -372,21 +366,32 @@ function render() {
   ctx.fillStyle = '#06060c';
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
   
-  // Draw tube lanes (vector wireframe)
-  ctx.strokeStyle = 'rgba(168, 85, 247, 0.12)';
-  ctx.lineWidth = 1;
+  // Draw tube lanes — with 3D depth shading (brighter near, darker far)
   for (let l = 0; l < lanes; l++) {
     const near = getTubePoint(l, 0, tubeRadius);
     const far = getTubePoint(l, tubeDepth, tubeRadius);
+    // Main lane line
+    ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(near.x, near.y);
     ctx.lineTo(far.x, far.y);
     ctx.stroke();
+    // Highlight line offset for 3D bevel effect
+    ctx.strokeStyle = 'rgba(200, 132, 252, 0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(near.x + 1, near.y + 1);
+    ctx.lineTo(far.x + 1, far.y + 1);
+    ctx.stroke();
   }
   
-  // Draw depth rings
+  // Draw depth rings — with solid 3D framing (double-stroke for thickness)
   for (let d = 0; d <= tubeDepth; d += 80) {
-    ctx.strokeStyle = `rgba(168, 85, 247, ${0.06 + 0.04 * (1 - d / tubeDepth)})`;
+    const depthAlpha = 0.06 + 0.04 * (1 - d / tubeDepth);
+    // Main ring
+    ctx.strokeStyle = `rgba(168, 85, 247, ${depthAlpha})`;
+    ctx.lineWidth = 1;
     ctx.beginPath();
     for (let l = 0; l <= lanes; l++) {
       const p = getTubePoint(l, d, tubeRadius);
@@ -394,14 +399,37 @@ function render() {
       else ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
+    // Inner highlight ring — gives solid 3D edge
+    if (d < tubeDepth * 0.6) {
+      ctx.strokeStyle = `rgba(200, 132, 252, ${depthAlpha * 0.5})`;
+      ctx.beginPath();
+      for (let l = 0; l <= lanes; l++) {
+        const p = getTubePoint(l, d, tubeRadius * 0.98);
+        if (l === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
   }
   
-  // Draw rim (player's circle)
-  ctx.strokeStyle = player.invuln > 0 ? 'rgba(168, 85, 247, 0.6)' : 'rgba(168, 85, 247, 0.3)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(CX(), CY(), tubeRadius + player.jumpHeight, 0, Math.PI * 2);
-  ctx.stroke();
+  // Draw rim — with 3D thickness (outer glow + inner shadow + main line)
+  const rimR = tubeRadius + player.jumpHeight;
+  // Outer glow
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.08)';
+  ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(CX(), CY(), rimR + 2, 0, Math.PI * 2); ctx.stroke();
+  // Main rim
+n  ctx.strokeStyle = player.invuln > 0 ? 'rgba(168, 85, 247, 0.8)' : 'rgba(168, 85, 247, 0.4)';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(CX(), CY(), rimR, 0, Math.PI * 2); ctx.stroke();
+  // Inner highlight — solid 3D edge
+  ctx.strokeStyle = player.invuln > 0 ? 'rgba(220, 180, 255, 0.5)' : 'rgba(200, 132, 252, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(CX(), CY(), rimR - 2, 0, Math.PI * 2); ctx.stroke();
+  // Inner shadow — depth on inside
+  ctx.strokeStyle = 'rgba(10, 5, 20, 0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(CX(), CY(), rimR - 4, 0, Math.PI * 2); ctx.stroke();
   
   // Draw enemies
   for (const e of enemies) {
@@ -414,38 +442,43 @@ function render() {
     ctx.rotate(e.angle);
     
     if (e.type === 'crawler') {
-      // Diamond shape
-      ctx.fillStyle = `rgba(255, 68, 102, ${fog})`;
+      // Crystal shard — sharp angular purple crystal
+      ctx.fillStyle = `rgba(168, 85, 247, ${fog})`;
       ctx.beginPath();
-      ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0);
+      ctx.moveTo(0, -size); ctx.lineTo(size * 0.6, -size * 0.3); ctx.lineTo(size * 0.4, size * 0.5); ctx.lineTo(0, size); ctx.lineTo(-size * 0.4, size * 0.5); ctx.lineTo(-size * 0.6, -size * 0.3);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = `rgba(255, 100, 130, ${fog})`;
+      // Facet lines
+      ctx.strokeStyle = `rgba(200, 132, 252, ${fog})`;
       ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.moveTo(-size * 0.6, -size * 0.3); ctx.lineTo(size * 0.6, -size * 0.3); ctx.stroke();
+      // Inner glow
+      ctx.fillStyle = `rgba(220, 180, 255, ${fog * 0.5})`;
+      ctx.beginPath(); ctx.arc(0, 0, size * 0.2, 0, Math.PI * 2); ctx.fill();
     } else if (e.type === 'spinner') {
-      // Spinning star
+      // Spinning crystal star — faceted orange crystal
       ctx.fillStyle = `rgba(255, 170, 0, ${fog})`;
       ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (i / 6) * Math.PI * 2;
-        const r = i % 2 === 0 ? size : size * 0.5;
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const r = i % 2 === 0 ? size : size * 0.4;
         const px = Math.cos(a) * r, py = Math.sin(a) * r;
         if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
       ctx.closePath(); ctx.fill();
+      // Crystal core
+      ctx.fillStyle = `rgba(255, 220, 100, ${fog * 0.7})`;
+      ctx.beginPath(); ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2); ctx.fill();
     } else {
-      // Tank — hexagon
-      ctx.fillStyle = `rgba(255, 0, 255, ${fog})`;
+      // Tank — faceted crystal cube (corrupted)
+      ctx.fillStyle = `rgba(120, 40, 160, ${fog})`;
       ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (i / 6) * Math.PI * 2;
-        const px = Math.cos(a) * size, py = Math.sin(a) * size;
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
+      ctx.moveTo(-size * 0.7, -size * 0.5); ctx.lineTo(size * 0.7, -size * 0.5); ctx.lineTo(size, 0); ctx.lineTo(size * 0.7, size * 0.5); ctx.lineTo(-size * 0.7, size * 0.5); ctx.lineTo(-size, 0);
       ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = `rgba(200, 100, 255, ${fog})`;
+      // Crystal edges
+      ctx.strokeStyle = `rgba(168, 85, 247, ${fog})`;
       ctx.lineWidth = 2; ctx.stroke();
-      // Inner dot
-      ctx.fillStyle = `rgba(255, 200, 255, ${fog})`;
+      // Inner corrupted glow
+      ctx.fillStyle = `rgba(255, 50, 200, ${fog * 0.6})`;
       ctx.beginPath(); ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
@@ -463,7 +496,7 @@ function render() {
   for (const s of spikes) {
     const p = getTubePoint(s.lane, s.depth, tubeRadius);
     const size = 4 * (1 - s.depth / tubeDepth);
-    ctx.fillStyle = '#ff4444';
+    ctx.fillStyle = '#a855f7';
     ctx.beginPath();
     ctx.arc(p.x, p.y, Math.max(2, size), 0, Math.PI * 2);
     ctx.fill();
@@ -493,16 +526,21 @@ function render() {
     ctx.globalAlpha = 0.4;
   }
   
-  // Player ship — claw shape pointing inward (toward center)
+  // Player — crystal claw pointing inward (toward center)
   ctx.fillStyle = '#a855f7';
   ctx.beginPath();
-  ctx.moveTo(-12, 8); ctx.lineTo(0, -14); ctx.lineTo(12, 8); ctx.lineTo(6, 4); ctx.lineTo(0, 8); ctx.lineTo(-6, 4);
+  ctx.moveTo(-14, 10); ctx.lineTo(-4, -16); ctx.lineTo(0, -20); ctx.lineTo(4, -16); ctx.lineTo(14, 10); ctx.lineTo(8, 6); ctx.lineTo(4, 10); ctx.lineTo(0, 12); ctx.lineTo(-4, 10); ctx.lineTo(-8, 6);
   ctx.closePath(); ctx.fill();
+  // Crystal facet lines
   ctx.strokeStyle = '#c084fc';
   ctx.lineWidth = 1.5; ctx.stroke();
-  // Glow
-  ctx.fillStyle = 'rgba(192, 132, 252, 0.3)';
-  ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 12); ctx.moveTo(-14, 10); ctx.lineTo(14, 10); ctx.stroke();
+  // Inner crystal glow
+  ctx.fillStyle = 'rgba(220, 180, 255, 0.4)';
+  ctx.beginPath(); ctx.arc(0, -4, 6, 0, Math.PI * 2); ctx.fill();
+  // Outer glow
+  ctx.fillStyle = 'rgba(192, 132, 252, 0.2)';
+  ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
   ctx.restore();
   

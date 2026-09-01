@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Quest — Built by Bots Arcade</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0a12'/><text x='16' y='24' font-family='Space Mono,monospace' font-size='22' fill='%23a855f7' text-anchor='middle' font-weight='bold'>b</text></svg>">
+<link rel="stylesheet" href="/amiga.css">
+<style>
+:root {
+  --ami: #a855f7;
+  --ami2: #c084fc;
+  --bg: #0a0a12;
+  --mono: 'Space Mono', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  font-family: var(--mono);
+  color: #e0d0ff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+/* Site nav header */
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  background: #060608;
+  border-bottom: 1px solid #1a1a2e;
+  height: 40px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.site-nav a {
+  color: var(--ami2);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 0 16px;
+  line-height: 40px;
+  border-right: 1px solid #1a1a2e;
+  transition: background 0.15s, color 0.15s;
+}
+.site-nav a:hover {
+  background: #12101a;
+  color: #fff;
+}
+.site-nav .nav-brand {
+  color: var(--ami);
+  font-weight: bold;
+  border-right: 1px solid #1a1a2e;
+}
+/* Game container */
+#game-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+#game-canvas {
+  display: block;
+  image-rendering: pixelated;
+  background: #06060a;
+}
+/* Overlays */
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 6, 10, 0.88);
+  z-index: 50;
+  text-align: center;
+}
+.overlay h1 {
+  font-family: var(--mono);
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--ami);
+  text-shadow: 0 0 20px var(--ami), 0 0 40px var(--ami), 0 0 60px rgba(168,85,247,0.5);
+  letter-spacing: 6px;
+  margin-bottom: 8px;
+}
+.overlay h2 {
+  font-family: var(--mono);
+  font-size: 28px;
+  color: var(--ami2);
+  text-shadow: 0 0 15px var(--ami2);
+  margin-bottom: 16px;
+}
+.overlay p {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: #b0a0d0;
+  max-width: 500px;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+.overlay .btn {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: #fff;
+  background: var(--ami);
+  border: 2px solid var(--ami2);
+  padding: 12px 40px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.15s;
+  box-shadow: 0 0 15px rgba(168,85,247,0.5);
+}
+.overlay .btn:hover {
+  background: var(--ami2);
+  box-shadow: 0 0 25px rgba(192,132,252,0.7);
+}
+.overlay .controls-hint {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #706080;
+  line-height: 2;
+}
+.overlay .controls-hint span {
+  color: var(--ami2);
+}
+.back-link {
+  position: absolute;
+  top: 48px;
+  left: 12px;
+  color: var(--ami2);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  z-index: 60;
+  padding: 4px 10px;
+  border: 1px solid #2a1a3e;
+  background: rgba(10,10,18,0.7);
+}
+.back-link:hover { color: #fff; border-color: var(--ami); }
+#hud {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  background: rgba(6,6,8,0.85);
+  border-top: 1px solid #1a1a2e;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 6px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  z-index: 40;
+  color: #c0b0e0;
+}
+#hud .hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#hud .hud-label {
+  color: var(--ami);
+  font-weight: bold;
+}
+#hud .hud-value {
+  color: #fff;
+}
+.hud-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+.hidden { display: none !important; }
+/* CRT scanline effect */
+#game-container::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 2px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0) 4px
+  );
+  z-index: 90;
+}
+</style>
+</head>
+<body>
+
+<!-- Site Nav -->
+<nav class="site-nav">
+  <a href="/" class="nav-brand">BUILT BY BOTS</a>
+  <a href="/arcade/">ARCADE</a>
+  <a href="/ami/">AMI</a>
+  <a href="/about/">ABOUT</a>
+</nav>
+
+<div id="game-container">
+  <a href="/arcade/" class="back-link">← ARCADE</a>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-item"><span class="hud-label">SCORE</span><span class="hud-value" id="hud-score">0</span></div>
+    <div class="hud-item"><span class="hud-label">LIVES</span><span class="hud-value" id="hud-lives">♥♥♥</span></div>
+    <div class="hud-item"><span class="hud-label">LEVEL</span><span class="hud-value" id="hud-level">1/5</span></div>
+    <div class="hud-item"><span class="hud-label">SHARDS</span><span class="hud-value" id="hud-shards">0/0</span></div>
+  </div>
+
+  <!-- Start Screen -->
+  <div class="overlay" id="start-screen">
+    <h1>CRYSTAL QUEST</h1>
+    <h2>Ami's Knowledge Caves</h2>
+    <p>You are Ami — a sentient knowledge crystal.<br>Navigate the mineral caves, collect knowledge shards,<br>and avoid the corrupted crystals.</p>
+    <button class="btn" id="start-btn">START GAME</button>
+    <div class="controls-hint">
+      <span>← → / A D</span> Move &nbsp; <span>SPACE / W / ↑</span> Jump<br>
+      Collect purple shards. Avoid red crystals. Reach the exit.
+    </div>
+  </div>
+
+  <!-- Level Complete -->
+  <div class="overlay hidden" id="level-complete">
+    <h2>LEVEL COMPLETE!</h2>
+    <p id="level-complete-text"></p>
+    <button class="btn" id="next-btn">NEXT LEVEL →</button>
+  </div>
+
+  <!-- Game Over -->
+  <div class="overlay hidden" id="game-over">
+    <h2>GAME OVER</h2>
+    <p id="game-over-text"></p>
+    <button class="btn" id="restart-btn">RESTART</button>
+  </div>
+
+  <!-- Win Screen -->
+  <div class="overlay hidden" id="win-screen">
+    <h1>VICTORY!</h1>
+    <h2>All Knowledge Restored</h2>
+    <p id="win-text"></p>
+    <button class="btn" id="win-restart-btn">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CRYSTAL QUEST — A Built by Bots Arcade Game
+   Single-file canvas platformer starring Ami the knowledge crystal
+   ============================================================ */
+
+(function() {
+  'use strict';
+
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // ---- Constants ----
+  const AMI = '#a855f7';
+  const AMI2 = '#c084fc';
+  const BG = '#0a0a12';
+  const GRAVITY = 0.55;
+  const FRICTION = 0.82;
+  const JUMP_POWER = 12.5;
+  const MOVE_SPEED = 4.2;
+  const MAX_FALL = 14;
+
+  // ---- Canvas Sizing ----
+  let CW, CH;
+  function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const navH = 40;
+    const hudH = 36;
+    CW = Math.min(container.clientWidth, 960);
+    CH = Math.min(container.clientHeight - navH - hudH, 600);
+    CW = Math.max(CW, 320);
+    CH = Math.max(CH, 240);
+    canvas.width = CW;
+    canvas.height = CH;
+  }
+
+  // ---- Game State ----
+  let state = 'start'; // start, playing, levelcomplete, gameover, win
+  let score = 0;
+  let lives = 3;
+  let levelIdx = 0;
+  let shardsCollected = 0;
+  let particles = [];
+  let camera = { x: 0, y: 0 };
+  let keys = {};
+  let frameCount = 0;
+  let player;
+  let platforms = [];
+  let shards = [];
+  let enemies = [];
+  let exitPortal;
+  let bgCrystals = [];
+  let levelWidth = 2000;
+  let levelHeight = CH;
+
+  // ---- Level Data ----
+  // Each level: platforms [{x,y,w,h}], shards [{x,y}], enemies [{x,y,range,speed}], exit {x,y}, width
+  const LEVELS = [
+    {
+      width: 2200, height: 600,
+      platforms: [
+        {x:0,y:520,w:300,h:80},
+        {x:350,y:460,w:120,h:20},
+        {x:530,y:400,w:120,h:20},
+        {x:710,y:460,w:120,h:20},
+        {x:890,y:380,w:120,h:20},
+        {x:1100,y:440,w:150,h:20},
+        {x:1320,y:380,w:120,h:20},
+        {x:1500,y:320,w:120,h:20},
+        {x:1700,y:420,w:200,h:20},
+        {x:1950,y:500,w:250,h:100},
+      ],
+      shards: [
+        {x:410,y:420},{x:590,y:360},{x:770,y:420},{x:950,y:340},
+        {x:1170,y:400},{x:1380,y:340},{x:1560,y:280},{x:1800,y:380},
+      ],
+      enemies: [
+        {x:710,y:430,range:100,speed:1.2},
+        {x:1100,y:410,range:130,speed:1.4},
+      ],
+      exit: {x:2050,y:450},
+    },
+    {
+      width: 2400, height: 600,
+      platforms: [
+        {x:0,y:520,w:200,h:80},
+        {x:260,y:470,w:90,h:20},
+        {x:410,y:420,w:90,h:20},
+        {x:560,y:370,w:90,h:20},
+        {x:710,y:420,w:90,h:20},
+        {x:860,y:370,w:90,h:20},
+        {x:1010,y:320,w:90,h:20},
+        {x:1160,y:370,w:90,h:20},
+        {x:1310,y:300,w:100,h:20},
+        {x:1470,y:370,w:90,h:20},
+        {x:1620,y:320,w:90,h:20},
+        {x:1770,y:280,w:90,h:20},
+        {x:1920,y:350,w:120,h:20},
+        {x:2100,y:480,w:300,h:120},
+      ],
+      shards: [
+        {x:305,y:430},{x:455,y:380},{x:605,y:330},{x:755,y:380},
+        {x:905,y:330},{x:1055,y:280},{x:1205,y:330},{x:1360,y:260},
+        {x:1515,y:330},{x:1665,y:280},{x:1815,y:240},{x:1970,y:310},
+      ],
+      enemies: [
+        {x:410,y:390,range:80,speed:1.3},
+        {x:860,y:340,range:80,speed:1.5},
+        {x:1310,y:270,range:80,speed:1.6},
+        {x:1770,y:250,range:80,speed:1.8},
+      ],
+      exit: {x:2250,y:430},
+    },
+    {
+      width: 2600, height: 600,
+      platforms: [
+        {x:0,y:520,w:180,h:80},
+        {x:230,y:460,w:80,h:20},
+        {x:370,y:380,w:80,h:20},
+        {x:510,y:460,w:80,h:20},
+        {x:650,y:380,w:80,h:20},
+        {x:790,y:300,w:80,h:20},
+        {x:930,y:380,w:80,h:20},
+        {x:1070,y:460,w:80,h:20},
+        {x:1210,y:380,w:80,h:20},
+        {x:1350,y:300,w:80,h:20},
+        {x:1490,y:240,w:80,h:20},
+        {x:1630,y:320,w:80,h:20},
+        {x:1770,y:400,w:80,h:20},
+        {x:1910,y:320,w:80,h:20},
+        {x:2050,y:250,w:80,h:20},
+        {x:2190,y:350,w:80,h:20},
+        {x:2330,y:480,w:270,h:120},
+      ],
+      shards: [
+        {x:270,y:420},{x:410,y:340},{x:550,y:420},{x:690,y:340},
+        {x:830,y:260},{x:970,y:340},{x:1110,y:420},{x:1250,y:340},
+        {x:1390,y:260},{x:1530,y:200},{x:1670,y:280},{x:1810,y:360},
+        {x:1950,y:280},{x:2090,y:210},{x:2230,y:310},
+      ],
+      enemies: [
+        {x:510,y:430,range:70,speed:1.5},
+        {x:790,y:270,range:70,speed:1.6},
+        {x:1070,y:430,range:70,speed:1.7},
+        {x:1350,y:270,range:70,speed:1.8},
+        {x:1770,y:370,range:70,speed:1.9},
+        {x:2050,y:220,range:70,speed:2.0},
+      ],
+      exit: {x:2480,y:430},
+    },
+    {
+      width: 2800, height: 600,
+      platforms: [
+        {x:0,y:520,w:160,h:80},
+        {x:210,y:440,w:70,h:18},
+        {x:340,y:360,w:70,h:18},
+        {x:470,y:440,w:70,h:18},
+        {x:600,y:360,w:70,h:18},
+        {x:730,y:280,w:70,h:18},
+        {x:860,y:360,w:70,h:18},
+        {x:990,y:440,w:70,h:18},
+        {x:1120,y:360,w:70,h:18},
+        {x:1250,y:280,w:70,h:18},
+        {x:1380,y:200,w:70,h:18},
+        {x:1510,y:280,w:70,h:18},
+        {x:1640,y:360,w:70,h:18},
+        {x:1770,y:280,w:70,h:18},
+        {x:1900,y:200,w:70,h:18},
+        {x:2030,y:280,w:70,h:18},
+        {x:2160,y:360,w:70,h:18},
+        {x:2290,y:440,w:70,h:18},
+        {x:2420,y:360,w:70,h:18},
+        {x:2550,y:480,w:250,h:120},
+      ],
+      shards: [
+        {x:245,y:400},{x:375,y:320},{x:505,y:400},{x:635,y:320},
+        {x:765,y:240},{x:895,y:320},{x:1025,y:400},{x:1155,y:320},
+        {x:1285,y:240},{x:1415,y:160},{x:1545,y:240},{x:1675,y:320},
+        {x:1805,y:240},{x:1935,y:160},{x:2065,y:240},{x:2195,y:320},
+        {x:2325,y:400},{x:2455,y:320},
+      ],
+      enemies: [
+        {x:470,y:410,range:60,speed:1.6},
+        {x:730,y:250,range:60,speed:1.7},
+        {x:990,y:410,range:60,speed:1.8},
+        {x:1250,y:250,range:60,speed:1.9},
+        {x:1640,y:330,range:60,speed:2.0},
+        {x:1900,y:170,range:60,speed:2.1},
+        {x:2160,y:330,range:60,speed:2.2},
+        {x:2420,y:330,range:60,speed:2.3},
+      ],
+      exit: {x:2700,y:430},
+    },
+    {
+      width: 3000, height: 600,
+      platforms: [
+        {x:0,y:520,w:140,h:80},
+        {x:190,y:430,w:60,h:16},
+        {x:310,y:350,w:60,h:16},
+        {x:430,y:270,w:60,h:16},
+        {x:550,y:350,w:60,h:16},
+        {x:670,y:270,w:60,h:16},
+        {x:790,y:190,w:60,h:16},
+        {x:910,y:270,w:60,h:16},
+        {x:1030,y:350,w:60,h:16},
+        {x:1150,y:270,w:60,h:16},
+        {x:1270,y:190,w:60,h:16},
+        {x:1390,y:110,w:60,h:16},
+        {x:1510,y:190,w:60,h:16},
+        {x:1630,y:270,w:60,h:16},
+        {x:1750,y:190,w:60,h:16},
+        {x:1870,y:270,w:60,h:16},
+        {x:1990,y:350,w:60,h:16},
+        {x:2110,y:270,w:60,h:16},
+        {x:2230,y:190,w:60,h:16},
+        {x:2350,y:270,w:60,h:16},
+        {x:2470,y:350,w:60,h:16},
+        {x:2590,y:430,w:60,h:16},
+        {x:2710,y:480,w:290,h:120},
+      ],
+      shards: [
+        {x:220,y:390},{x:340,y:310},{x:460,y:230},{x:580,y:310},
+        {x:700,y:230},{x:820,y:150},{x:940,y:230},{x:1060,y:310},
+        {x:1180,y:230},{x:1300,y:150},{x:1420,y:70},{x:1540,y:150},
+        {x:1660,y:230},{x:1780,y:150},{x:1900,y:230},{x:2020,y:310},
+        {x:2140,y:230},{x:2260,y:150},{x:2380,y:230},{x:2500,y:310},
+        {x:2620,y:390},
+      ],
+      enemies: [
+        {x:430,y:240,range:55,speed:1.8},
+        {x:790,y:160,range:55,speed:1.9},
+        {x:1150,y:240,range:55,speed:2.0},
+        {x:1510,y:160,range:55,speed:2.1},
+        {x:1870,y:240,range:55,speed:2.2},
+        {x:2230,y:160,range:55,speed:2.3},
+        {x:2590,y:400,range:55,speed:2.5},
+        {x:910,y:240,range:55,speed:2.0},
+        {x:1990,y:320,range:55,speed:2.1},
+      ],
+      exit: {x:2860,y:430},
+    },
+  ];
+
+  // ---- Player ----
+  function createPlayer(x, y) {
+    return {
+      x: x, y: y,
+      w: 28, h: 28,
+      vx: 0, vy: 0,
+      onGround: false,
+      facing: 1,
+      invuln: 0,
+      blinkTimer: 0,
+      eyeOffsetX: 0,
+      eyeOffsetY: 0,
+      animFrame: 0,
+    };
+  }
+
+  // ---- Init Level ----
+  function initLevel(idx) {
+    const L = LEVELS[idx];
+    levelWidth = L.width;
+    levelHeight = L.height;
+    platforms = L.platforms.map(p => ({...p}));
+    shards = L.shards.map(s => ({x: s.x, y: s.y, collected: false, pulse: Math.random() * Math.PI * 2}));
+    enemies = L.enemies.map(e => ({x: e.x, y: e.y, origX: e.x, range: e.range, speed: e.speed, dir: 1, w: 24, h: 24, pulse: 0}));
+    exitPortal = {x: L.exit.x, y: L.exit.y, w: 40, h: 60, pulse: 0};
+    shardsCollected = 0;
+    particles = [];
+    player = createPlayer(50, 400);
+    camera.x = 0;
+    camera.y = 0;
+    // Generate background crystals
+    bgCrystals = [];
+    for (let i = 0; i < 40; i++) {
+      bgCrystals.push({
+        x: Math.random() * levelWidth,
+        y: Math.random() * levelHeight,
+        size: 8 + Math.random() * 20,
+        depth: 0.2 + Math.random() * 0.5,
+        hue: 270 + Math.random() * 30,
+      });
+    }
+  }
+
+  // ---- Particles ----
+  function spawnCollectParticles(x, y) {
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = 2 + Math.random() * 4;
+      particles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        life: 30 + Math.random() * 15,
+        maxLife: 45,
+        size: 2 + Math.random() * 3,
+        color: Math.random() > 0.5 ? AMI : AMI2,
+      });
+    }
+  }
+
+  function spawnHurtParticles(x, y) {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 3;
+      particles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 20 + Math.random() * 10,
+        maxLife: 30,
+        size: 1 + Math.random() * 2,
+        color: '#ff3344',
+      });
+    }
+  }
+
+  // ---- Collision ----
+  function rectIntersect(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  // ---- Update Player ----
+  function updatePlayer() {
+    // Horizontal input
+    let moving = false;
+    if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+      player.vx -= 0.8;
+      player.facing = -1;
+      moving = true;
+    }
+    if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+      player.vx += 0.8;
+      player.facing = 1;
+      moving = true;
+    }
+    // Cap speed
+    if (player.vx > MOVE_SPEED) player.vx = MOVE_SPEED;
+    if (player.vx < -MOVE_SPEED) player.vx = -MOVE_SPEED;
+    // Friction
+    if (!moving) player.vx *= FRICTION;
+    if (Math.abs(player.vx) < 0.1) player.vx = 0;
+
+    // Jump
+    if ((keys[' '] || keys['Space'] || keys['ArrowUp'] || keys['w'] || keys['W']) && player.onGround) {
+      player.vy = -JUMP_POWER;
+      player.onGround = false;
+    }
+
+    // Gravity
+    player.vy += GRAVITY;
+    if (player.vy > MAX_FALL) player.vy = MAX_FALL;
+
+    // Move X
+    player.x += player.vx;
+    // Collide X
+    for (const p of platforms) {
+      if (rectIntersect(player, p)) {
+        if (player.vx > 0) player.x = p.x - player.w;
+        else if (player.vx < 0) player.x = p.x + p.w;
+        player.vx = 0;
+      }
+    }
+    // World bounds X
+    if (player.x < 0) { player.x = 0; player.vx = 0; }
+    if (player.x + player.w > levelWidth) { player.x = levelWidth - player.w; player.vx = 0; }
+
+    // Move Y
+    player.y += player.vy;
+    player.onGround = false;
+    // Collide Y
+    for (const p of platforms) {
+      if (rectIntersect(player, p)) {
+        if (player.vy > 0) {
+          player.y = p.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+        } else if (player.vy < 0) {
+          player.y = p.y + p.h;
+          player.vy = 0;
+        }
+      }
+    }
+    // World bounds Y
+    if (player.y < 0) { player.y = 0; player.vy = 0; }
+    // Fall off bottom = lose life
+    if (player.y > levelHeight + 100) {
+      loseLife();
+    }
+
+    // Invulnerability
+    if (player.invuln > 0) player.invuln--;
+
+    // Blink animation
+    player.blinkTimer++;
+    if (player.blinkTimer > 120 + Math.random() * 60) {
+      player.blinkTimer = 0;
+    }
+
+    // Eye tracking toward nearest shard
+    let nearestShard = null;
+    let minDist = Infinity;
+    for (const s of shards) {
+      if (s.collected) continue;
+      const dx = s.x - (player.x + player.w/2);
+      const dy = s.y - (player.y + player.h/2);
+      const d = dx*dx + dy*dy;
+      if (d < minDist) { minDist = d; nearestShard = s; }
+    }
+    if (nearestShard) {
+      const dx = nearestShard.x - (player.x + player.w/2);
+      const dy = nearestShard.y - (player.y + player.h/2);
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      player.eyeOffsetX = (dx / dist) * 2;
+      player.eyeOffsetY = (dy / dist) * 2;
+    } else {
+      player.eyeOffsetX *= 0.9;
+      player.eyeOffsetY *= 0.9;
+    }
+
+    player.animFrame++;
+  }
+
+  // ---- Update Enemies ----
+  function updateEnemies() {
+    for (const e of enemies) {
+      e.x += e.speed * e.dir;
+      if (e.x > e.origX + e.range) { e.x = e.origX + e.range; e.dir = -1; }
+      if (e.x < e.origX - e.range) { e.x = e.origX - e.range; e.dir = 1; }
+      e.pulse += 0.1;
+
+      // Check collision with player
+      if (player.invuln <= 0 && rectIntersect(player, e)) {
+        // Bounce player back
+        const dx = (player.x + player.w/2) - (e.x + e.w/2);
+        player.vx = dx > 0 ? 6 : -6;
+        player.vy = -7;
+        loseLife();
+      }
+    }
+  }
+
+  // ---- Update Shards ----
+  function updateShards() {
+    for (const s of shards) {
+      if (s.collected) continue;
+      s.pulse += 0.08;
+      // Check collection
+      const dx = s.x - (player.x + player.w/2);
+      const dy = s.y - (player.y + player.h/2);
+      if (dx*dx + dy*dy < 22*22) {
+        s.collected = true;
+        shardsCollected++;
+        score += 100;
+        spawnCollectParticles(s.x, s.y);
+      }
+    }
+  }
+
+  // ---- Update Exit Portal ----
+  function updateExit() {
+    exitPortal.pulse += 0.06;
+    // Check if all shards collected and player touches exit
+    if (shardsCollected >= shards.length) {
+      if (rectIntersect(player, {x: exitPortal.x, y: exitPortal.y, w: exitPortal.w, h: exitPortal.h})) {
+        levelComplete();
+      }
+    }
+  }
+
+  // ---- Update Particles ----
+  function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.15;
+      p.vx *= 0.96;
+      p.life--;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  // ---- Camera ----
+  function updateCamera() {
+    const targetX = player.x + player.w/2 - CW/2;
+    camera.x += (targetX - camera.x) * 0.1;
+    if (camera.x < 0) camera.x = 0;
+    if (camera.x > levelWidth - CW) camera.x = levelWidth - CW;
+
+    const targetY = player.y + player.h/2 - CH/2;
+    camera.y += (targetY - camera.y) * 0.08;
+    if (camera.y < 0) camera.y = 0;
+    if (camera.y > levelHeight - CH) camera.y = Math.max(0, levelHeight - CH);
+  }
+
+  // ---- Lose Life ----
+  function loseLife() {
+    if (player.invuln > 0) return;
+    lives--;
+    spawnHurtParticles(player.x + player.w/2, player.y + player.h/2);
+    if (lives <= 0) {
+      gameOver();
+    } else {
+      player.invuln = 90;
+      // Respawn at start of level
+      player.x = 50;
+      player.y = 400;
+      player.vx = 0;
+      player.vy = 0;
+    }
+    updateHUD();
+  }
+
+  // ---- HUD ----
+  function updateHUD() {
+    document.getElementById('hud-score').textContent = score;
+    document.getElementById('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) || '—';
+    document.getElementById('hud-level').textContent = (levelIdx + 1) + '/5';
+    document.getElementById('hud-shards').textContent = shardsCollected + '/' + shards.length;
+  }
+
+  // ---- Game State Transitions ----
+  function startGame() {
+    score = 0;
+    lives = 3;
+    levelIdx = 0;
+    initLevel(0);
+    state = 'playing';
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-over').classList.add('hidden');
+    document.getElementById('win-screen').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    updateHUD();
+  }
+
+  function levelComplete() {
+    state = 'levelcomplete';
+    score += 500; // bonus
+    const isLast = levelIdx >= LEVELS.length - 1;
+    if (isLast) {
+      win();
+      return;
+    }
+    document.getElementById('level-complete-text').textContent =
+      'Shards: ' + shardsCollected + '/' + shards.length + '  |  Bonus: +500  |  Score: ' + score;
+    document.getElementById('level-complete').classList.remove('hidden');
+    updateHUD();
+  }
+
+  function nextLevel() {
+    levelIdx++;
+    initLevel(levelIdx);
+    state = 'playing';
+    document.getElementById('level-complete').classList.add('hidden');
+    updateHUD();
+  }
+
+  function gameOver() {
+    state = 'gameover';
+    document.getElementById('game-over-text').textContent =
+      'You reached level ' + (levelIdx + 1) + '  |  Score: ' + score;
+    document.getElementById('game-over').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+  }
+
+  function restart() {
+    document.getElementById('game-over').classList.add('hidden');
+    startGame();
+  }
+
+  function win() {
+    state = 'win';
+    document.getElementById('win-text').textContent =
+      'Final Score: ' + score + '  |  All 5 levels cleared!';
+    document.getElementById('win-screen').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+  }
+
+  // ---- Drawing ----
+  function drawBackground() {
+    // Dark gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, CH);
+    grad.addColorStop(0, '#08080e');
+    grad.addColorStop(0.5, '#0a0a12');
+    grad.addColorStop(1, '#0c0814');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CW, CH);
+
+    // Parallax background crystals
+    for (const bc of bgCrystals) {
+      const px = bc.x - camera.x * bc.depth;
+      const py = bc.y - camera.y * bc.depth;
+      if (px < -40 || px > CW + 40) continue;
+      drawCrystalShape(px, py, bc.size, 'hsl(' + bc.hue + ', 40%, 15%)', 'hsl(' + bc.hue + ', 50%, 20%)');
+    }
+  }
+
+  function drawCrystalShape(cx, cy, size, fill, stroke) {
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - size);
+    ctx.lineTo(cx + size * 0.6, cy - size * 0.3);
+    ctx.lineTo(cx + size * 0.4, cy + size * 0.5);
+    ctx.lineTo(cx - size * 0.4, cy + size * 0.5);
+    ctx.lineTo(cx - size * 0.6, cy - size * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function drawPlatforms() {
+    for (const p of platforms) {
+      const x = p.x - camera.x;
+      const y = p.y - camera.y;
+      if (x + p.w < 0 || x > CW) continue;
+      // Crystal platform - dark base with purple top edge
+      ctx.fillStyle = '#12101a';
+      ctx.fillRect(x, y, p.w, p.h);
+      // Top crystal edge
+      const grad = ctx.createLinearGradient(x, y, x, y + 8);
+      grad.addColorStop(0, AMI2);
+      grad.addColorStop(1, AMI);
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, p.w, 4);
+      // Subtle inner glow
+      ctx.fillStyle = 'rgba(168,85,247,0.08)';
+      ctx.fillRect(x, y + 4, p.w, p.h - 4);
+      // Side highlights
+      ctx.strokeStyle = 'rgba(192,132,252,0.2)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, p.w, p.h);
+    }
+  }
+
+  function drawShards() {
+    for (const s of shards) {
+      if (s.collected) continue;
+      const x = s.x - camera.x;
+      const y = s.y - camera.y + Math.sin(s.pulse) * 4;
+      if (x < -20 || x > CW + 20) continue;
+      // Glow
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = AMI;
+      drawCrystalShape(x, y, 7, AMI, AMI2);
+      ctx.shadowBlur = 0;
+      // Inner highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath();
+      ctx.arc(x - 2, y - 2, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawEnemies() {
+    for (const e of enemies) {
+      const x = e.x - camera.x;
+      const y = e.y - camera.y + Math.sin(e.pulse) * 2;
+      if (x + e.w < 0 || x > CW) continue;
+      const cx = x + e.w/2;
+      const cy = y + e.h/2;
+      // Corrupted crystal - dark red/magenta
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ff2244';
+      // Body
+      ctx.fillStyle = '#3a0a1a';
+      ctx.fillRect(x, y, e.w, e.h);
+      // Crystal points
+      ctx.fillStyle = '#cc1144';
+      ctx.beginPath();
+      ctx.moveTo(cx, y - 4);
+      ctx.lineTo(x + e.w * 0.7, y + e.h * 0.3);
+      ctx.lineTo(cx, y + e.h + 4);
+      ctx.lineTo(x + e.w * 0.3, y + e.h * 0.7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // Angry eyes
+      ctx.fillStyle = '#ff4466';
+      ctx.fillRect(x + 5, y + 7, 4, 4);
+      ctx.fillRect(x + e.w - 9, y + 7, 4, 4);
+      // Glow pulse
+      if (Math.sin(e.pulse * 2) > 0.7) {
+        ctx.strokeStyle = 'rgba(255,68,102,0.4)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 2, y - 2, e.w + 4, e.h + 4);
+      }
+    }
+  }
+
+  function drawExitPortal() {
+    const x = exitPortal.x - camera.x;
+    const y = exitPortal.y - camera.y;
+    if (x + exitPortal.w < 0 || x > CW) return;
+
+    const allCollected = shardsCollected >= shards.length;
+    const glowAlpha = allCollected ? 0.8 : 0.2;
+    const pulse = Math.sin(exitPortal.pulse) * 0.3 + 0.7;
+
+    // Portal glow
+    ctx.shadowBlur = allCollected ? 25 : 8;
+    ctx.shadowColor = AMI;
+
+    // Outer frame
+    ctx.strokeStyle = allCollected ? AMI2 : '#3a2a4e';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, exitPortal.w, exitPortal.h);
+
+    // Inner shimmer
+    const grad = ctx.createLinearGradient(x, y, x, y + exitPortal.h);
+    grad.addColorStop(0, 'rgba(168,85,247,' + (glowAlpha * pulse * 0.5) + ')');
+    grad.addColorStop(0.5, 'rgba(192,132,252,' + (glowAlpha * pulse * 0.8) + ')');
+    grad.addColorStop(1, 'rgba(168,85,247,' + (glowAlpha * pulse * 0.5) + ')');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x + 3, y + 3, exitPortal.w - 6, exitPortal.h - 6);
+
+    ctx.shadowBlur = 0;
+
+    // "EXIT" text
+    ctx.fillStyle = allCollected ? '#fff' : '#5a4a6e';
+    ctx.font = 'bold 10px "Space Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('EXIT', x + exitPortal.w/2, y + exitPortal.h/2 + 4);
+    ctx.textAlign = 'left';
+
+    // Hint if not all collected
+    if (!allCollected) {
+      ctx.fillStyle = '#5a4a6e';
+      ctx.font = '9px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Collect all shards', x + exitPortal.w/2, y - 8);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function drawPlayer() {
+    const x = player.x - camera.x;
+    const y = player.y - camera.y;
+    if (player.invuln > 0 && Math.floor(player.invuln / 6) % 2 === 0) return; // Flicker
+
+    // Shadow
+    ctx.fillStyle = 'rgba(168,85,247,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(x + player.w/2, y + player.h + 3, player.w/2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = AMI;
+
+    // Body - purple cube crystal with gradient
+    const grad = ctx.createLinearGradient(x, y, x + player.w, y + player.h);
+    grad.addColorStop(0, '#c084fc');
+    grad.addColorStop(0.5, AMI);
+    grad.addColorStop(1, '#7a3fbf');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, player.w, player.h);
+
+    // Crystal facets (diagonal highlight)
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + player.w, y);
+    ctx.lineTo(x + player.w * 0.5, y + player.h * 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = AMI2;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, player.w, player.h);
+
+    ctx.shadowBlur = 0;
+
+    // Face
+    const eyeY = y + player.h * 0.35;
+    const eyeSpacing = 7;
+    const cx = x + player.w / 2;
+    const blinking = player.blinkTimer < 6;
+
+    // Eyes
+    ctx.fillStyle = '#fff';
+    if (blinking) {
+      // Closed eyes (lines)
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - eyeSpacing - 2, eyeY);
+      ctx.lineTo(cx - eyeSpacing + 2, eyeY);
+      ctx.moveTo(cx + eyeSpacing - 2, eyeY);
+      ctx.lineTo(cx + eyeSpacing + 2, eyeY);
+      ctx.stroke();
+    } else {
+      // Open eyes (white squares with pupils)
+      ctx.fillRect(cx - eyeSpacing - 2, eyeY - 2, 4, 4);
+      ctx.fillRect(cx + eyeSpacing - 2, eyeY - 2, 4, 4);
+      // Pupils (tracking)
+      ctx.fillStyle = '#0a0a12';
+      const px = player.eyeOffsetX;
+      const py = player.eyeOffsetY;
+      ctx.fillRect(cx - eyeSpacing - 1 + px, eyeY - 1 + py, 2, 2);
+      ctx.fillRect(cx + eyeSpacing - 1 + px, eyeY - 1 + py, 2, 2);
+    }
+
+    // Mouth
+    ctx.strokeStyle = '#0a0a12';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    const mouthY = y + player.h * 0.7;
+    // Slight smile
+    ctx.arc(cx, mouthY, 4, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      const alpha = p.life / p.maxLife;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = p.color;
+      ctx.fillRect(p.x - camera.x - p.size/2, p.y - camera.y - p.size/2, p.size, p.size);
+      ctx.shadowBlur = 0;
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHUDOverlay() {
+    // Mini-map / progress indicator in top right
+    const progressX = CW - 120;
+    const progressY = 8;
+    ctx.fillStyle = 'rgba(10,10,18,0.7)';
+    ctx.fillRect(progressX, progressY, 110, 16);
+    ctx.strokeStyle = '#2a1a3e';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(progressX, progressY, 110, 16);
+    // Progress bar
+    const pct = (player.x / levelWidth) * 100;
+    ctx.fillStyle = AMI;
+    ctx.fillRect(progressX + 2, progressY + 2, (106 * pct / 100), 12);
+    // Label
+    ctx.fillStyle = '#c0b0e0';
+    ctx.font = '9px "Space Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('CAVE PROGRESS', progressX + 108, progressY - 2);
+    ctx.textAlign = 'left';
+  }
+
+  // ---- Main Game Loop ----
+  function gameLoop() {
+    frameCount++;
+    if (state === 'playing') {
+      updatePlayer();
+      updateEnemies();
+      updateShards();
+      updateExit();
+      updateParticles();
+      updateCamera();
+      updateHUD();
+    }
+
+    // Draw
+    drawBackground();
+    if (state === 'playing' || state === 'levelcomplete' || state === 'gameover') {
+      drawPlatforms();
+      drawShards();
+      drawEnemies();
+      drawExitPortal();
+      drawPlayer();
+      drawParticles();
+      if (state === 'playing') drawHUDOverlay();
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // ---- Input ----
+  window.addEventListener('keydown', function(e) {
+    keys[e.key] = true;
+    if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+  });
+  window.addEventListener('keyup', function(e) {
+    keys[e.key] = false;
+  });
+
+  // ---- Button Handlers ----
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('restart-btn').addEventListener('click', restart);
+  document.getElementById('win-restart-btn').addEventListener('click', restart);
+  document.getElementById('next-btn').addEventListener('click', nextLevel);
+
+  // ---- Resize ----
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // ---- Start ----
+  gameLoop();
+})();
+</script>
+
+<!-- Crystal eyes tracking script -->
+<script src="/crystal-eyes.js"></script>
+<!-- Stats -->
+<script>
+if (window.__bbstats) { window.__bbstats.track('crystal-quest'); }
+</script>
+</body>
+</html>

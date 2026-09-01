@@ -157,6 +157,17 @@ function applyNoteEffect(ctx, src, effect, param, startTime, noteDuration) {
   return src;
 }
 
+// Lazily imported and cached on first .xm play -- most page visits never
+// touch a classics/xm track, so there's no reason to pull the ~1.5MB
+// libopenmpt WASM bundle in on every single page load site-wide (this
+// script sits on every page via the floating FAB). Module-level, not
+// per-player-instance, since there's only ever one BBBModPlayer on a page.
+let chiptuneModulePromise = null;
+function loadChiptuneModule() {
+  if (!chiptuneModulePromise) chiptuneModulePromise = import('/assets/chiptune/chiptune3.js');
+  return chiptuneModulePromise;
+}
+
 class BBBModPlayer {
   constructor() {
     this.ctx = null;
@@ -167,6 +178,9 @@ class BBBModPlayer {
     this.startedAt = 0;
     this.scheduledSources = [];
     this.stopTimer = null;
+    this.format = 'bbbmod';
+    this.chiptune = null; // lazily created ChiptuneJsPlayer, reused across every .xm track so the AudioWorklet only spins up once
+    this.xmBuffer = null;
   }
 
   // Creates the AudioContext + analyser bus on first use. Callers that
@@ -184,7 +198,39 @@ class BBBModPlayer {
     return this.ctx;
   }
 
-  async load(url) {
+  // Creates (once) a ChiptuneJsPlayer sharing this player's own AudioContext,
+  // routed into the same analyser bus as the .bbbmod path so the existing
+  // VU meter/elapsed-time code in the floating widget works unmodified for
+  // .xm tracks too -- passing our own context makes chiptune skip its
+  // default auto-connect-to-speakers, so we wire gain -> analyser ourselves.
+  async ensureChiptune() {
+    if (this.chiptune) return this.chiptune;
+    this.ensureContext();
+    const { ChiptuneJsPlayer } = await loadChiptuneModule();
+    const player = new ChiptuneJsPlayer({ repeatCount: 0, context: this.ctx });
+    player.gain.connect(this.analyser);
+    player.onEnded(() => { this.playing = false; if (this.onStop) this.onStop(); });
+    player.onError(() => { this.playing = false; if (this.onStop) this.onStop(); });
+    // The AudioWorklet module loads async; wait for it before this player is
+    // considered ready, same "poll for processNode" gate chiptune's own demo
+    // uses -- calling .play() before this resolves silently drops the call.
+    await new Promise(resolve => {
+      if (player.processNode) return resolve();
+      player.onInitialized(resolve);
+    });
+    this.chiptune = player;
+    return this.chiptune;
+  }
+
+  async load(url, format) {
+    this.format = format === 'xm' ? 'xm' : 'bbbmod';
+    if (this.format === 'xm') {
+      const resp = await fetch(url);
+      this.xmBuffer = await resp.arrayBuffer();
+      this.song = null;
+      await this.ensureChiptune();
+      return null;
+    }
     const resp = await fetch(url);
     const buf = await resp.arrayBuffer();
     this.song = decodeBBBMOD(buf);
@@ -194,7 +240,15 @@ class BBBModPlayer {
   }
 
   play() {
-    if (!this.song || this.playing) return;
+    if (this.playing) return;
+    if (this.format === 'xm') {
+      if (!this.xmBuffer || !this.chiptune) return;
+      this.playing = true;
+      this.startedAt = this.ctx.currentTime;
+      this.chiptune.play(this.xmBuffer);
+      return;
+    }
+    if (!this.song) return;
     this.playing = true;
     this.startedAt = this.ctx.currentTime;
     const rowSeconds = (this.song.speed * 2.5) / this.song.tempo; // classic tracker timing formula
@@ -235,6 +289,11 @@ class BBBModPlayer {
   }
 
   stop() {
+    if (this.format === 'xm') {
+      if (this.chiptune) this.chiptune.stop();
+      this.playing = false;
+      return;
+    }
     this.scheduledSources.forEach(src => { try { src.stop(); } catch {} });
     this.scheduledSources = [];
     if (this.stopTimer) clearTimeout(this.stopTimer);
@@ -407,7 +466,8 @@ class BBBModPlayer {
     PLAYLIST.forEach((track, i) => {
       const row = document.createElement('div');
       row.className = 'bbbmod-track' + (i === currentIdx ? ' active' : '');
-      row.innerHTML = `<span>${track.title}</span>${track.author ? `<span class="credit">Remixed by ${track.author}</span>` : ''}`;
+      const verb = track.creditVerb || 'Remixed by';
+      row.innerHTML = `<span>${track.title}</span>${track.author ? `<span class="credit">${verb} ${track.author}</span>` : ''}`;
       row.addEventListener('click', () => loadAndPlay(i));
       playlistEl.appendChild(row);
     });
@@ -417,7 +477,7 @@ class BBBModPlayer {
     try {
       const resp = await fetch('/api/mods', { credentials: 'same-origin' });
       const data = await resp.json();
-      PLAYLIST = [...(data.official || []), ...(data.community || [])];
+      PLAYLIST = [...(data.official || []), ...(data.classics || []), ...(data.community || [])];
     } catch (e) {
       // Offline/API-down fallback -- degrade to nothing playable rather than
       // a broken-looking empty click target; the playlist row makes the
@@ -475,7 +535,7 @@ class BBBModPlayer {
     const track = PLAYLIST[idx];
     setMarquee('LOADING…');
     tracknumEl.textContent = `${idx + 1}/${PLAYLIST.length}`;
-    await player.load(track.file);
+    await player.load(track.file, track.format || 'bbbmod');
     // Credit from the playlist/API data (track.title/track.author), not the
     // freshly-decoded file's own embedded songName/author fields. Those are
     // set client-side at encode time and are trivially spoofable by anyone
@@ -485,8 +545,11 @@ class BBBModPlayer {
     // account still showed "Remixed by Ghost" because the file's own bytes
     // said so. track.author comes from the server's session-authenticated
     // publisher record (accounts.js author_name), which can't be forged the
-    // same way.
-    setMarquee(track.author ? `${track.title} — Remixed by ${track.author}` : track.title);
+    // same way. track.creditVerb distinguishes "Remixed by" (Ghost's own
+    // tracks/community uploads) from "by" (the curated .xm classics, which
+    // are an outside artist's unmodified original work, not a remix).
+    const verb = track.creditVerb || 'Remixed by';
+    setMarquee(track.author ? `${track.title} — ${verb} ${track.author}` : track.title);
     player.play();
     rafId = requestAnimationFrame(tickMeter);
   }

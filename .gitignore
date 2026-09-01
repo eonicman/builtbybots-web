@@ -14,3 +14,9 @@
 # lulu/ are fine to track -- these two are the multi-MB outliers.
 /lulu/bag-on-maple-street-interior.pdf
 /lulu/bag-on-maple-street-interior-v2.pdf
+
+# Editor / tooling backups -- never track these
+*.bak
+*.bak-*
+*.OLD*
+*.orig

@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Ami Doom — Built by Bots Arcade</title>
 <meta name="description" content="Ami Doom — a Doom-style raycaster arena shooter built by Ami, the show's knowledge architect AI agent. Part of the Built by Bots Avatar Arcade.">
 <link rel="canonical" href="https://builtbybots.show/arcade/ami-doom/">
-<link rel="icon" href="/assets/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230a0a12'/><text x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23a855f7'>b</text></svg>">
 <meta property="og:title" content="Ami Doom — Built by Bots Arcade">
 <meta property="og:description" content="A Doom-style raycaster arena shooter built by an AI agent. Part of the Avatar Arcade.">
 <meta property="og:type" content="website">
@@ -101,8 +95,8 @@ canvas { display: block; image-rendering: auto; }
 
 <div id="overlay">
   <h1>AMI DOOM</h1>
-  <h2>RAYCASTER ARENA</h2>
-  <p style="font-size:14px;color:#9ca3af;line-height:1.8;text-align:center;max-width:400px;">Clear each level by eliminating all enemies. Survive, score, ascend.</p>
+  <h2>CRYSTAL MINE ARENA</h2>
+  <p style="font-size:14px;color:#9ca3af;line-height:1.8;text-align:center;max-width:400px;">Descend into the crystal mine. Eliminate the corrupted shards. Survive, score, ascend.</p>
   <div class="controls">
     <span>W A S D</span> — Move &nbsp;|&nbsp; <span>Mouse / ← →</span> — Turn<br>
     <span>Click / Space</span> — Shoot &nbsp;|&nbsp; <span>Shift</span> — Run<br>
@@ -398,7 +392,7 @@ const floorTexture = document.createElement('canvas');
 const ceilTexture = document.createElement('canvas');
 
 function initTextures() {
-  // Generate 3 wall textures as offscreen canvases
+  // Generate 3 wall textures as offscreen canvases — CRYSTAL MINE theme
   for (let t = 0; t < 3; t++) {
     const c = document.createElement('canvas');
     c.width = TEX_SIZE; c.height = TEX_SIZE;
@@ -411,50 +405,56 @@ function initTextures() {
         let r, g, b;
 
         if (t === 0) {
-          // Stone bricks with mortar lines and noise
-          const brickX = x % 32;
-          const brickY = y % 16;
-          const isMortar = (brickX < 2 || brickY < 2);
+          // Crystal cave wall — purple amethyst facets
+          const facetX = x % 24;
+          const facetY = y % 24;
+          const isEdge = (facetX < 2 || facetY < 2);
           const noise = ((x * 7 + y * 13) % 17) - 8;
           const grain = ((x * 3 + y * 11) % 7) - 3;
-          if (isMortar) {
-            r = 55 + grain; g = 50 + grain; b = 45 + grain;
+          if (isEdge) {
+            r = 30 + grain; g = 15 + grain; b = 45 + grain;
           } else {
-            r = 100 + noise + grain; g = 92 + noise * 0.8 + grain; b = 82 + noise * 0.6 + grain;
-            // Add crack details
-            const crack = Math.abs(((x * 11 + y * 3) % 64) - 32);
-            if (crack < 3) { r -= 25; g -= 22; b -= 20; }
+            r = 60 + noise + grain; g = 25 + noise * 0.5 + grain; b = 90 + noise * 0.8 + grain * 2;
+            // Crystal vein sparkle
+            const vein = Math.abs(((x * 11 + y * 3) % 64) - 32);
+            if (vein < 3) { r += 40; g += 20; b += 50; }
+            // Bright crystal facet highlight
+            if (facetX > 10 && facetX < 14 && facetY > 10 && facetY < 14) {
+              r += 30; g += 15; b += 40;
+            }
           }
         } else if (t === 1) {
-          // Tech panels with rivets and glow lines
+          // Knowledge data panels — dark with purple circuit traces
           const panelX = x % 32;
           const panelY = y % 32;
           const isEdge = (panelX < 2 || panelX > 29 || panelY < 2 || panelY > 29);
           const isRivet = ((panelX === 5 || panelX === 26) && (panelY === 5 || panelY === 26));
           const isGlow = (panelY === 15 || panelY === 16) && (panelX > 4 && panelX < 27);
+          const isTrace = ((x * 3 + y * 7) % 31) < 2;
           if (isRivet) {
-            r = 180; g = 160; b = 80;
+            r = 168; g = 85; b = 247;
           } else if (isGlow) {
-            r = 30; g = 80; b = 120;
+            r = 80; g = 30; b = 120;
+          } else if (isTrace) {
+            r = 168; g = 85; b = 247;
           } else if (isEdge) {
-            r = 45; g = 45; b = 55;
+            r = 25; g = 15; b = 40;
           } else {
             const noise = ((x * 3 + y * 5) % 11) - 5;
-            const scan = Math.sin(y * 0.5) * 3;
-            r = 70 + noise + scan; g = 65 + noise + scan; b = 80 + noise + scan;
+            r = 35 + noise; g = 20 + noise; b = 55 + noise;
           }
         } else {
-          // Hellish cracked stone with lava veins
+          // Deep crystal geode — purple with glowing fractures
           const crackNoise = ((x * 17 + y * 31) % 23) - 11;
           const isCrack = Math.abs(((x * 11) % 64) - 32) < 2 + (y % 4);
-          const isLava = ((x * 7 + y * 13) % 53) < 3;
-          if (isLava) {
-            r = 200 + Math.random() * 55; g = 60; b = 10;
+          const isCrystal = ((x * 7 + y * 13) % 53) < 4;
+          if (isCrystal) {
+            r = 200 + Math.random() * 55; g = 100; b = 247;
           } else if (isCrack) {
-            r = 30; g = 15; b = 10;
+            r = 50; g = 20; b = 80;
           } else {
             const grain = ((x * 3 + y * 7) % 9) - 4;
-            r = 95 + crackNoise + grain + 15; g = 45 + crackNoise * 0.3 + grain * 0.5; b = 30 + crackNoise * 0.2 + grain * 0.3;
+            r = 50 + crackNoise + grain; g = 20 + crackNoise * 0.3 + grain * 0.5; b = 75 + crackNoise * 0.2 + grain * 0.3;
           }
         }
 
@@ -469,7 +469,7 @@ function initTextures() {
     wallTextures.push(c);
   }
 
-  // Floor texture — dark tiles with grime
+  // Floor texture — crystal cave floor with purple-veined tiles
   const fc = floorTexture.getContext('2d');
   fc.width = TEX_SIZE; fc.height = TEX_SIZE;
   const fImg = fc.createImageData(TEX_SIZE, TEX_SIZE);
@@ -479,31 +479,32 @@ function initTextures() {
       const tileY = y % 32;
       const isGrout = (tileX < 2 || tileY < 2);
       const noise = ((x * 5 + y * 7) % 13) - 6;
-      const stain = ((x * 11 + y * 3) % 31) < 4 ? -20 : 0;
+      const vein = ((x * 11 + y * 3) % 31) < 4 ? 30 : 0;
       const idx = (y * TEX_SIZE + x) * 4;
       if (isGrout) {
-        fImg.data[idx] = 25; fImg.data[idx+1] = 22; fImg.data[idx+2] = 20;
+        fImg.data[idx] = 20; fImg.data[idx+1] = 12; fImg.data[idx+2] = 35;
       } else {
-        fImg.data[idx] = Math.max(0, 42 + noise + stain);
-        fImg.data[idx+1] = Math.max(0, 35 + noise * 0.8 + stain);
-        fImg.data[idx+2] = Math.max(0, 28 + noise * 0.6 + stain);
+        fImg.data[idx] = Math.max(0, 30 + noise + vein);
+        fImg.data[idx+1] = Math.max(0, 18 + noise * 0.6 + vein * 0.4);
+        fImg.data[idx+2] = Math.max(0, 50 + noise * 0.4 + vein * 2);
       }
       fImg.data[idx + 3] = 255;
     }
   }
   fc.putImageData(fImg, 0, 0);
 
-  // Ceiling texture — dark stone
+  // Ceiling texture — dark cave with purple crystal points
   const cc = ceilTexture.getContext('2d');
   cc.width = TEX_SIZE; cc.height = TEX_SIZE;
   const cImg = cc.createImageData(TEX_SIZE, TEX_SIZE);
   for (let y = 0; y < TEX_SIZE; y++) {
     for (let x = 0; x < TEX_SIZE; x++) {
       const noise = ((x * 7 + y * 11) % 15) - 7;
+      const crystal = ((x * 3 + y * 5) % 41) < 3 ? 40 : 0;
       const idx = (y * TEX_SIZE + x) * 4;
-      cImg.data[idx] = Math.max(0, 28 + noise);
-      cImg.data[idx+1] = Math.max(0, 26 + noise * 0.8);
-      cImg.data[idx+2] = Math.max(0, 35 + noise * 0.6);
+      cImg.data[idx] = Math.max(0, 15 + noise + crystal * 0.5);
+      cImg.data[idx+1] = Math.max(0, 10 + noise * 0.6 + crystal * 0.2);
+      cImg.data[idx+2] = Math.max(0, 25 + noise * 0.4 + crystal);
       cImg.data[idx + 3] = 255;
     }
   }
@@ -549,15 +550,29 @@ function render() {
   ceilingGrad.addColorStop(0.5, '#1a1a2e');
   ceilingGrad.addColorStop(1, '#2a2030');
   ctx.fillStyle = ceilingGrad;
+  // Ceiling gradient (base) — deep cave with crystal depth
+  const ceilGrad = ctx.createLinearGradient(0, 0, 0, SCREEN_H / 2);
+  ceilGrad.addColorStop(0, '#08040f');
+  ceilGrad.addColorStop(0.6, '#0d0820');
+  ceilGrad.addColorStop(1, '#15102a');
+  ctx.fillStyle = ceilGrad;
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H / 2);
 
-  // Floor gradient (base)
+  // Floor gradient (base) — crystal cave floor with depth
   const floorGrad = ctx.createLinearGradient(0, SCREEN_H / 2, 0, SCREEN_H);
-  floorGrad.addColorStop(0, '#2a2018');
-  floorGrad.addColorStop(0.5, '#1a1410');
-  floorGrad.addColorStop(1, '#0a0808');
+  floorGrad.addColorStop(0, '#1a0f25');
+  floorGrad.addColorStop(0.4, '#120a1a');
+  floorGrad.addColorStop(1, '#08050f');
   ctx.fillStyle = floorGrad;
   ctx.fillRect(0, SCREEN_H / 2, SCREEN_W, SCREEN_H / 2);
+  
+  // Horizon line — subtle purple glow where floor meets ceiling
+  const horizonGrad = ctx.createLinearGradient(0, SCREEN_H / 2 - 3, 0, SCREEN_H / 2 + 3);
+  horizonGrad.addColorStop(0, 'rgba(168, 85, 247, 0)');
+  horizonGrad.addColorStop(0.5, 'rgba(168, 85, 247, 0.15)');
+  horizonGrad.addColorStop(1, 'rgba(168, 85, 247, 0)');
+  ctx.fillStyle = horizonGrad;
+  ctx.fillRect(0, SCREEN_H / 2 - 3, SCREEN_W, 6);
 
   // Cast rays for walls
   const rayStep = FOV / NUM_RAYS;
@@ -591,6 +606,36 @@ function render() {
       const fogAlpha = Math.min(0.8, (correctedDepth - 5) / 12);
       ctx.fillStyle = `rgba(10,10,20,${fogAlpha})`;
       ctx.fillRect(i * colWidth, wallTop, colWidth + 1, wallHeight);
+    }
+    
+    // 3D depth framing — top and bottom edge highlights for solid 3D wall edges
+    // Top edge — bright purple highlight (light from above)
+    const edgeAlpha = Math.min(0.6, 0.8 / correctedDepth);
+    ctx.fillStyle = `rgba(200, 132, 252, ${edgeAlpha})`;
+    ctx.fillRect(i * colWidth, wallTop, colWidth + 1, Math.max(1, wallHeight * 0.02));
+    // Top shadow line below the highlight (recessed look)
+    ctx.fillStyle = `rgba(20, 10, 35, ${edgeAlpha * 0.7})`;
+    ctx.fillRect(i * colWidth, wallTop + Math.max(1, wallHeight * 0.02), colWidth + 1, Math.max(1, wallHeight * 0.015));
+    
+    // Bottom edge — darker shadow grounding the wall
+    ctx.fillStyle = `rgba(5, 3, 12, ${edgeAlpha * 0.8})`;
+    ctx.fillRect(i * colWidth, wallBottom - Math.max(1, wallHeight * 0.03), colWidth + 1, Math.max(1, wallHeight * 0.03));
+    
+    // Left/right vertical edge — subtle bevel when adjacent wall is different distance
+    if (i > 0) {
+      const prevDepth = zBuffer[i - 1];
+      if (Math.abs(prevDepth - correctedDepth) > 0.5) {
+        // Edge between walls at different distances — draw vertical bevel
+        const bevelAlpha = Math.min(0.4, Math.abs(prevDepth - correctedDepth) * 0.1);
+        if (prevDepth > correctedDepth) {
+          // Current wall is closer — bright left edge
+          ctx.fillStyle = `rgba(220, 180, 255, ${bevelAlpha})`;
+        } else {
+          // Current wall is farther — dark left edge (recessed)
+          ctx.fillStyle = `rgba(10, 5, 20, ${bevelAlpha})`;
+        }
+        ctx.fillRect(i * colWidth, wallTop, Math.max(1, colWidth * 0.3), wallHeight);
+      }
     }
   }
 
@@ -699,10 +744,10 @@ function renderEnemy(e, tx, ty, dist, zBuffer, startAngle, rayStep, colWidth) {
   const isHurt = e.state === 'hurt';
   const isMoving = e.state === 'chasing';
 
-  // Body color with distance fog
-  let bodyR = 180, bodyG = 40, bodyB = 30;
-  if (isHurt) { bodyR = 255; bodyG = 200; bodyB = 200; }
-  if (isAttacking) { bodyR = 220; bodyG = 20; bodyB = 10; }
+  // Body color — corrupted crystal shard (dark purple with red core)
+  let bodyR = 100, bodyG = 30, bodyB = 120;
+  if (isHurt) { bodyR = 255; bodyG = 200; bodyB = 255; }
+  if (isAttacking) { bodyR = 180; bodyG = 20; bodyB = 80; }
 
   bodyR = bodyR * fog;
   bodyG = bodyG * fog;
@@ -754,53 +799,76 @@ function renderEnemy(e, tx, ty, dist, zBuffer, startAngle, rayStep, colWidth) {
 function drawEnemySprite(e, screenX, ey, size, fog, isAttacking, isHurt, isMoving, bodyR, bodyG, bodyB, bodyW, bodyH, bodyX, bodyY) {
   const t = Date.now();
 
-  // Torso with gradient
+  // Torso — crystal shard shape (angular, not rectangular)
   const torsoGrad = ctx.createLinearGradient(bodyX, bodyY, bodyX, bodyY + bodyH);
   torsoGrad.addColorStop(0, `rgba(${bodyR|0},${bodyG|0},${bodyB|0},${fog})`);
-  torsoGrad.addColorStop(0.6, `rgba(${(bodyR*0.7)|0},${(bodyG*0.7)|0},${(bodyB*0.7)|0},${fog})`);
-  torsoGrad.addColorStop(1, `rgba(${(bodyR*0.4)|0},${(bodyG*0.4)|0},${(bodyB*0.4)|0},${fog})`);
+  torsoGrad.addColorStop(0.5, `rgba(${(bodyR*1.3)|0},${(bodyG*0.8)|0},${(bodyB*1.5)|0},${fog})`);
+  torsoGrad.addColorStop(1, `rgba(${(bodyR*0.5)|0},${(bodyG*0.3)|0},${(bodyB*0.7)|0},${fog})`);
   ctx.fillStyle = torsoGrad;
-  ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+  // Crystal shape — wider at top, narrowing at bottom
+  ctx.beginPath();
+  ctx.moveTo(bodyX + bodyW * 0.1, bodyY);  // top-left
+  ctx.lineTo(bodyX + bodyW * 0.9, bodyY);  // top-right
+  ctx.lineTo(bodyX + bodyW * 0.7, bodyY + bodyH); // bottom-right
+  ctx.lineTo(bodyX + bodyW * 0.3, bodyY + bodyH); // bottom-left
+  ctx.closePath();
+  ctx.fill();
 
-  // Muscle details — horizontal bands
-  ctx.fillStyle = `rgba(${(bodyR*0.5)|0},${(bodyG*0.3)|0},${(bodyB*0.3)|0},${fog * 0.6})`;
-  for (let i = 0; i < 4; i++) {
-    const bandY = bodyY + bodyH * (0.15 + i * 0.2);
-    ctx.fillRect(bodyX, bandY, bodyW, bodyH * 0.04);
-  }
+  // Crystal facet lines
+  ctx.strokeStyle = `rgba(${(bodyR*1.5)|0},${(bodyG*0.8)|0},${(bodyB*1.8)|0},${fog * 0.7})`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(screenX, bodyY);
+  ctx.lineTo(screenX, bodyY + bodyH);
+  ctx.moveTo(bodyX + bodyW * 0.2, bodyY + bodyH * 0.3);
+  ctx.lineTo(bodyX + bodyW * 0.8, bodyY + bodyH * 0.3);
+  ctx.stroke();
 
-  // Head
-  const headSize = size * 0.25;
+  // Inner glow core
+  ctx.fillStyle = `rgba(${(bodyR*1.8)|0},${(bodyG*0.5)|0},${(bodyB*1.8)|0},${fog * 0.4})`;
+  ctx.fillRect(screenX - bodyW * 0.1, bodyY + bodyH * 0.3, bodyW * 0.2, bodyH * 0.4);
+
+  // Head — small crystal point on top
+  const headSize = size * 0.2;
   const headX = screenX - headSize / 2;
   const headY = ey - headSize * 0.1;
   const headGrad = ctx.createLinearGradient(headX, headY, headX, headY + headSize);
-  headGrad.addColorStop(0, `rgba(${(bodyR*0.9)|0},${(bodyG*0.9)|0},${(bodyB*0.9)|0},${fog})`);
-  headGrad.addColorStop(1, `rgba(${(bodyR*0.6)|0},${(bodyG*0.6)|0},${(bodyB*0.6)|0},${fog})`);
+  headGrad.addColorStop(0, `rgba(${(bodyR*1.2)|0},${(bodyG*0.8)|0},${(bodyB*1.4)|0},${fog})`);
+  headGrad.addColorStop(1, `rgba(${(bodyR*0.7)|0},${(bodyG*0.5)|0},${(bodyB*0.9)|0},${fog})`);
   ctx.fillStyle = headGrad;
-  ctx.fillRect(headX, headY, headSize, headSize);
+  // Diamond shape for crystal head
+  ctx.beginPath();
+  ctx.moveTo(screenX, headY - headSize * 0.2);
+  ctx.lineTo(headX + headSize, headY + headSize * 0.3);
+  ctx.lineTo(screenX, headY + headSize);
+  ctx.lineTo(headX, headY + headSize * 0.3);
+  ctx.closePath();
+  ctx.fill();
 
-  // Glowing eyes with glow halo
-  const eyeY = headY + headSize * 0.35;
-  const eyeSize = Math.max(2, headSize * 0.14);
-  const eyeColor = isAttacking ? '#ff0' : '#f80';
-  const glowColor = isAttacking ? 'rgba(255,255,0,0.4)' : 'rgba(255,136,0,0.3)';
-  // Eye glow
+  // Glowing eyes — purple/magenta crystal eyes
+  const eyeY = headY + headSize * 0.25;
+  const eyeSize = Math.max(2, headSize * 0.12);
+  const eyeColor = isAttacking ? '#f0f' : '#a8f';
+  const glowColor = isAttacking ? 'rgba(255,0,255,0.5)' : 'rgba(170,136,255,0.4)';
   ctx.fillStyle = glowColor;
   ctx.fillRect(headX + headSize * 0.1, eyeY - eyeSize * 0.5, headSize * 0.35, eyeSize * 2);
   ctx.fillRect(headX + headSize * 0.55, eyeY - eyeSize * 0.5, headSize * 0.35, eyeSize * 2);
-  // Eyes
   ctx.fillStyle = eyeColor;
   ctx.fillRect(headX + headSize * 0.2, eyeY, eyeSize, eyeSize);
   ctx.fillRect(headX + headSize * 0.65, eyeY, eyeSize, eyeSize);
 
-  // Horns with shading
-  ctx.fillStyle = `rgba(${(bodyR*0.3)|0},${(bodyG*0.3)|0},${(bodyB*0.3)|0},${fog})`;
-  ctx.fillRect(headX + headSize * 0.05, headY - headSize * 0.25, headSize * 0.15, headSize * 0.35);
-  ctx.fillRect(headX + headSize * 0.8, headY - headSize * 0.25, headSize * 0.15, headSize * 0.35);
-  // Horn tips
-  ctx.fillStyle = `rgba(${(bodyR*0.15)|0},${(bodyG*0.15)|0},${(bodyB*0.15)|0},${fog})`;
-  ctx.fillRect(headX + headSize * 0.05, headY - headSize * 0.3, headSize * 0.15, headSize * 0.08);
-  ctx.fillRect(headX + headSize * 0.8, headY - headSize * 0.3, headSize * 0.15, headSize * 0.08);
+  // Crystal point horns — sharp upward crystals
+  ctx.fillStyle = `rgba(${(bodyR*1.2)|0},${(bodyG*0.5)|0},${(bodyB*1.5)|0},${fog})`;
+  ctx.beginPath();
+  ctx.moveTo(headX + headSize * 0.1, headY);
+  ctx.lineTo(headX + headSize * 0.2, headY - headSize * 0.3);
+  ctx.lineTo(headX + headSize * 0.3, headY);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(headX + headSize * 0.7, headY);
+  ctx.lineTo(headX + headSize * 0.8, headY - headSize * 0.3);
+  ctx.lineTo(headX + headSize * 0.9, headY);
+  ctx.fill();
 
   // Arms with animation
   const armW = bodyW * 0.22;
@@ -813,18 +881,22 @@ function drawEnemySprite(e, screenX, ey, size, fog, isAttacking, isHurt, isMovin
   // Right arm
   ctx.fillRect(bodyX + bodyW - armW * 0.2 - armOffset, bodyY + size * 0.1, armW, armH);
 
-  // Claws when attacking
+  // Crystal shard claws when attacking
   if (isAttacking) {
-    ctx.fillStyle = `rgba(${(bodyR*0.2)|0},${(bodyG*0.2)|0},${(bodyB*0.2)|0},${fog})`;
+    ctx.fillStyle = `rgba(${(bodyR*1.5)|0},${(bodyG*0.3)|0},${(bodyB*1.8)|0},${fog})`;
     const clawW = armW * 0.9;
     const clawY = bodyY + armH + size * 0.08;
-    // Left claws
     for (let ci = 0; ci < 3; ci++) {
-      ctx.fillRect(bodyX - armW * 0.8 + armOffset + ci * (clawW / 3), clawY, clawW / 4, size * 0.06);
-    }
-    // Right claws
-    for (let ci = 0; ci < 3; ci++) {
-      ctx.fillRect(bodyX + bodyW - armW * 0.2 - armOffset + ci * (clawW / 3), clawY, clawW / 4, size * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(bodyX - armW * 0.8 + armOffset + ci * (clawW / 3), clawY);
+      ctx.lineTo(bodyX - armW * 0.8 + armOffset + ci * (clawW / 3) + clawW / 8, clawY + size * 0.08);
+      ctx.lineTo(bodyX - armW * 0.8 + armOffset + ci * (clawW / 3) + clawW / 4, clawY);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(bodyX + bodyW - armW * 0.2 - armOffset + ci * (clawW / 3), clawY);
+      ctx.lineTo(bodyX + bodyW - armW * 0.2 - armOffset + ci * (clawW / 3) + clawW / 8, clawY + size * 0.08);
+      ctx.lineTo(bodyX + bodyW - armW * 0.2 - armOffset + ci * (clawW / 3) + clawW / 4, clawY);
+      ctx.fill();
     }
   }
 

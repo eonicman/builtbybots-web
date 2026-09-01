@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-adsense-account" content="ca-pub-2874546800688654">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2874546800688654" crossorigin="anonymous"></script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Ami Defender — Built by Bots Arcade</title>
 <meta name="description" content="Ami Defender — a Defender-style side-scrolling shooter. Protect the humans, blast the aliens, don't let them mutate. Part of the Built by Bots Avatar Arcade.">
 <link rel="canonical" href="https://builtbybots.show/arcade/ami-defender/">
-<link rel="icon" href="/assets/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230a0a12'/><text x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23a855f7'>b</text></svg>">
 <meta property="og:title" content="Ami Defender — Built by Bots Arcade">
 <meta property="og:description" content="A Defender-style side-scrolling shooter built by an AI agent. Part of the Avatar Arcade.">
 <meta property="og:type" content="website">
@@ -352,9 +346,10 @@ function render() {
     ctx.fillRect(sx, sy, 2, 2);
   }
   
-  // Terrain — draw twice for wrap
+  // Terrain — draw twice for wrap with 3D depth
   const groundY = getGroundY();
-  ctx.fillStyle = '#1a1218';
+  // Terrain fill — dark cave floor
+  ctx.fillStyle = '#1a0f25';
   ctx.beginPath();
   ctx.moveTo(0, SCREEN_H);
   for (let sx = 0; sx <= SCREEN_W; sx += 4) {
@@ -366,13 +361,33 @@ function render() {
   ctx.closePath();
   ctx.fill();
   
-  // Terrain outline
-  ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
-  ctx.lineWidth = 1;
+  // Terrain depth gradient — darker at bottom for solid 3D ground
+  const terrainGrad = ctx.createLinearGradient(0, groundY - 20, 0, SCREEN_H);
+  terrainGrad.addColorStop(0, 'rgba(168, 85, 247, 0.05)');
+  terrainGrad.addColorStop(0.3, 'rgba(20, 10, 35, 0.3)');
+  terrainGrad.addColorStop(1, 'rgba(5, 2, 12, 0.6)');
+  ctx.fillStyle = terrainGrad;
+  ctx.fillRect(0, groundY - 20, SCREEN_W, SCREEN_H - groundY + 20);
+  
+  // Terrain top edge — bright purple highlight (solid 3D rim)
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+  ctx.lineWidth = 2;
   ctx.beginPath();
   for (let sx = 0; sx <= SCREEN_W; sx += 4) {
     const worldX = cameraX + sx;
     const ty = getTerrainY(worldX);
+    if (sx === 0) ctx.moveTo(sx, ty);
+    else ctx.lineTo(sx, ty);
+  }
+  ctx.stroke();
+  
+  // Terrain inner shadow — 3D depth below the rim
+  ctx.strokeStyle = 'rgba(10, 5, 20, 0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let sx = 0; sx <= SCREEN_W; sx += 4) {
+    const worldX = cameraX + sx;
+    const ty = getTerrainY(worldX) + 3;
     if (sx === 0) ctx.moveTo(sx, ty);
     else ctx.lineTo(sx, ty);
   }
@@ -385,16 +400,17 @@ function render() {
     if (sx < -20 || sx > SCREEN_W + 20) continue;
     const hy = h.falling ? h.y : getTerrainY(h.x) - 12;
     
-    // Body
-    ctx.fillStyle = '#4488ff';
-    ctx.fillRect(sx - 3, hy - 6, 6, 8);
-    // Head
-    ctx.fillStyle = '#88aaff';
-    ctx.fillRect(sx - 2, hy - 10, 4, 4);
-    // Legs
-    ctx.fillStyle = '#3366cc';
-    ctx.fillRect(sx - 2, hy + 2, 2, 4);
-    ctx.fillRect(sx + 1, hy + 2, 2, 4);
+    // Crystal shard (knowledge) — small purple crystal on the ground
+    ctx.fillStyle = '#a855f7';
+    ctx.beginPath();
+    ctx.moveTo(sx, hy - 12); ctx.lineTo(sx + 4, hy - 4); ctx.lineTo(sx + 2, hy + 4); ctx.lineTo(sx - 2, hy + 4); ctx.lineTo(sx - 4, hy - 4);
+    ctx.closePath(); ctx.fill();
+    // Sparkle
+    ctx.fillStyle = '#c084fc';
+    ctx.fillRect(sx - 1, hy - 8, 2, 2);
+    // Shadow
+    ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+    ctx.beginPath(); ctx.ellipse(sx, hy + 4, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
     
     if (h.falling) {
       // Panic indicator
@@ -416,22 +432,18 @@ function render() {
     ctx.rotate(a.angle);
     
     if (a.type === 'lander') {
-      // Lander — upside-down U with grabber arms
+      // Lander — corrupted crystal extractor with grabber claws
       ctx.fillStyle = a.color;
       ctx.beginPath();
-      ctx.moveTo(-a.size, -a.size*0.5);
-      ctx.lineTo(-a.size, a.size*0.5);
-      ctx.lineTo(-a.size*0.5, a.size);
-      ctx.lineTo(a.size*0.5, a.size);
-      ctx.lineTo(a.size, a.size*0.5);
-      ctx.lineTo(a.size, -a.size*0.5);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(-a.size, -a.size*0.5); ctx.lineTo(-a.size*0.6, -a.size); ctx.lineTo(a.size*0.6, -a.size); ctx.lineTo(a.size, -a.size*0.5); ctx.lineTo(a.size, a.size*0.5); ctx.lineTo(a.size*0.5, a.size); ctx.lineTo(-a.size*0.5, a.size);
+      ctx.closePath(); ctx.fill();
+      // Crystal facet lines
       ctx.strokeStyle = '#ff6688';
       ctx.lineWidth = 1;
       ctx.stroke();
-      // Eye
-      ctx.fillStyle = '#ff0';
+      ctx.beginPath(); ctx.moveTo(0, -a.size); ctx.lineTo(0, a.size); ctx.stroke();
+      // Corrupted eye
+      ctx.fillStyle = '#f0f';
       ctx.fillRect(-2, -a.size*0.3, 4, 4);
       // Grabber arms when abducting
       if (a.state === 'abducting') {
@@ -514,17 +526,19 @@ function render() {
     ctx.translate(psx, player.y);
     ctx.scale(player.facing, 1);
     
-    // Ship body
+    // Crystal ship body — angular gem shape
     ctx.fillStyle = '#a855f7';
     ctx.beginPath();
-    ctx.moveTo(14, 0); ctx.lineTo(-8, -8); ctx.lineTo(-4, 0); ctx.lineTo(-8, 8);
+    ctx.moveTo(16, 0); ctx.lineTo(8, -4); ctx.lineTo(-4, -10); ctx.lineTo(-8, -6); ctx.lineTo(-4, 0); ctx.lineTo(-8, 6); ctx.lineTo(-4, 10); ctx.lineTo(8, 4);
     ctx.closePath(); ctx.fill();
+    // Crystal facets
     ctx.strokeStyle = '#c084fc';
     ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-4, 0); ctx.moveTo(8, -4); ctx.lineTo(-4, -10); ctx.moveTo(8, 4); ctx.lineTo(-4, 10); ctx.stroke();
     
-    // Cockpit
-    ctx.fillStyle = '#c084fc';
-    ctx.beginPath(); ctx.arc(4, 0, 3, 0, Math.PI * 2); ctx.fill();
+    // Crystal core glow
+    ctx.fillStyle = 'rgba(220, 180, 255, 0.6)';
+    ctx.beginPath(); ctx.arc(2, 0, 4, 0, Math.PI * 2); ctx.fill();
     
     // Thrust flame
     if (keys['ArrowUp'] || keys['KeyW'] || keys['ArrowDown'] || keys['KeyS'] || Math.abs(player.vx) > 0.5) {

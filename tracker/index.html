@@ -33,6 +33,7 @@
         .inst-row .inst-num{font-family:var(--mono);color:var(--glow);width:24px}
         .inst-row .inst-name{flex:1;color:var(--ink)}
         .inst-row .inst-meta{color:var(--fg3);font-family:var(--mono);font-size:.85em}
+        .inst-row .inst-key{color:var(--glow);font-family:var(--mono);font-size:.85em;min-width:110px;text-align:right}
         .inst-row button{background:none;border:1px solid var(--border);color:var(--fg3);padding:4px 10px;border-radius:2px;cursor:pointer;font-size:.8em}
         .inst-row button:hover{border-color:var(--glow);color:var(--glow)}
         #instEmpty{color:var(--fg3);font-size:.88em;font-style:italic}
@@ -80,7 +81,7 @@
 <div class="tk-wrap">
   <div class="tk-hd">
     <h1>▸ .bbbmod Tracker</h1>
-    <p>Build a song, hear it live, download the real file. 4 channels, 32 rows, one pattern to start. New here? <a href="/tracker/guide/" style="color:var(--glow)">Read the Guide</a> — Quick Start gets you to a sound in under a minute.</p>
+    <p>Build a song, hear it live, download the real file. 5 channels, 128 rows, one pattern to start. New here? <a href="/tracker/guide/" style="color:var(--glow)">Read the Guide</a> — Quick Start gets you to a sound in under a minute.</p>
     <p id="tkGateMsg" style="font-family:var(--mono);font-size:.82em;color:var(--fg3)"></p>
   </div>
 
@@ -105,6 +106,10 @@
         <input type="file" id="sampleUpload" accept="audio/wav,audio/mpeg,audio/mp3" style="display:none">
       </label>
       <button class="btn btn-ghost" id="btnRecordSample" type="button">&#127908; Record Sample</button>
+      <label class="btn btn-ghost" style="cursor:pointer;display:inline-block">
+        Load .bbbmod File
+        <input type="file" id="songUpload" accept=".bbbmod" style="display:none">
+      </label>
     </div>
     <div id="recordControls" style="display:none;align-items:center;gap:10px;margin-top:10px">
       <span style="color:#e05b5b;font-family:var(--mono);font-size:.85em">&#9679; Recording&hellip; <span id="recordTime">0.0s</span></span>
@@ -164,6 +169,25 @@
     <h2>Your Published Mods</h2>
     <div id="tkMyModsList"></div>
   </div>
+
+  <div class="tk-panel" style="margin-top:24px">
+    <h2>Publish a .xm Track</h2>
+    <p style="color:var(--fg3);font-size:.85em;margin-bottom:10px">Already have a track made in a real tracker (MilkyTracker, OpenMPT, etc.)? Publish the raw <code>.xm</code> file straight to the floating player — it plays back via <a href="https://lib.openmpt.org/libopenmpt/" target="_blank" rel="noopener" style="color:var(--glow)">libopenmpt</a>, the same engine real tracker software uses, so effects/instruments/channels beyond this editor's own 5×128 grid all come through correctly. This is a separate path from the grid above — an <code>.xm</code> file isn't loaded into the editor, just published as-is.</p>
+    <p id="tkXmGateMsg" style="font-family:var(--mono);font-size:.82em;color:var(--fg3);margin-bottom:10px"></p>
+    <label class="btn btn-ghost" style="cursor:pointer;display:inline-block">
+      Choose .xm File
+      <input type="file" id="xmUpload" accept=".xm" style="display:none">
+    </label>
+    <span id="xmFileName" style="font-family:var(--mono);font-size:.82em;color:var(--fg3);margin-left:8px"></span>
+    <button class="btn btn-primary" id="btnPublishXm" disabled style="margin-left:8px">&#9737; Publish this file</button>
+    <div id="tkXmStatus" style="margin-top:8px"></div>
+  </div>
+
+  <div class="tk-panel" style="margin-top:24px">
+    <h2>Classics — Curated Tracker Music</h2>
+    <p style="color:var(--fg3);font-size:.85em;margin-bottom:10px">Ten real <code>.xm</code> tracks from The Mod Archive, picked for the floating player — all individually verified Public Domain, credited to their original artists. Worth a listen before you start: this is what people build with a tracker once they've been at it a while. Hit the chrome badge bottom-right to play any of them (they're mixed into the same playlist as the official tracks).</p>
+    <div id="tkClassicsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;font-family:var(--mono);font-size:.82em">Loading…</div>
+  </div>
 </div>
 
 <footer><div class="wrap">
@@ -172,6 +196,7 @@
 
 <script src="/assets/bbbmod-player.js"></script>
 <script src="/assets/preset-synth.js"></script>
+<script src="/assets/audio-analysis.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -186,13 +211,17 @@ fetch('/api/user/me', { credentials: 'same-origin' })
     authState = data;
     const gateMsg = document.getElementById('tkGateMsg');
     const publishBtn = document.getElementById('btnPublish');
+    const xmGateMsg = document.getElementById('tkXmGateMsg');
     if (!data.loggedIn) {
       gateMsg.innerHTML = 'Publishing your track for everyone to hear needs a Patreon sign-in — <a href="/auth/patreon/login" style="color:var(--glow)">Sign in with Patreon</a>. Preview and download work without one.';
+      xmGateMsg.innerHTML = 'Publishing a .xm file needs a Patreon sign-in too — <a href="/auth/patreon/login" style="color:var(--glow)">Sign in with Patreon</a>.';
     } else if (!data.isPatron) {
       gateMsg.textContent = `Signed in as ${data.username}. Publishing needs an active $10+/mo Patreon membership — preview and download still work.`;
+      xmGateMsg.textContent = `Signed in as ${data.username}. Publishing a .xm file needs an active $10+/mo Patreon membership too.`;
     } else {
       gateMsg.textContent = `Signed in as ${data.username} (Patron) — you can publish.`;
       publishBtn.disabled = false;
+      xmGateMsg.textContent = `Signed in as ${data.username} (Patron) — you can publish a .xm file below.`;
     }
     if (data.loggedIn) refreshMyMods();
   })
@@ -235,8 +264,8 @@ async function refreshMyMods() {
   } catch {}
 }
 
-const CHANNELS = 4;
-const ROWS = 32;
+const CHANNELS = 5;
+const ROWS = 128;
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
 // Track-level effects. The .bbbmod format reserves effect+effectParam per
@@ -293,10 +322,16 @@ function renderInstruments() {
   state.instruments.forEach((inst, i) => {
     const row = document.createElement('div');
     row.className = 'inst-row';
+    const keyText = inst.detectedKey
+      ? (inst.detectedKey === 'none' ? 'no clear pitch' : `${inst.detectedKey.tonicName} ${inst.detectedKey.mode} (${Math.round(inst.detectedKey.confidence * 100)}%)`)
+      : '';
     row.innerHTML = `<span class="inst-num">${i + 1}</span><span class="inst-name">${inst.name}</span>` +
       `<span class="inst-meta">${inst.audioBuffer.sampleRate}Hz · ${inst.audioBuffer.duration.toFixed(2)}s</span>` +
-      `<button data-i="${i}">Remove</button>`;
-    row.querySelector('button').addEventListener('click', () => {
+      `<span class="inst-key">${keyText}</span>` +
+      `<button class="btn-detect-key" data-i="${i}">Detect Key</button>` +
+      `<button class="btn-remove-inst" data-i="${i}">Remove</button>`;
+    row.querySelector('.btn-detect-key').addEventListener('click', () => detectInstrumentKey(i));
+    row.querySelector('.btn-remove-inst').addEventListener('click', () => {
       state.instruments.splice(i, 1);
       renderInstruments();
       populateInstrumentSelect();
@@ -304,6 +339,30 @@ function renderInstruments() {
     list.appendChild(row);
   });
   populateInstrumentSelect();
+}
+
+// --- Ghost Tracks Phase A: pitch/key detection on an existing instrument.
+// Deferred via setTimeout so the "Analyzing..." status actually paints
+// before the synchronous YIN pass runs -- worst case (a full 15s recording)
+// takes ~1-1.5s and would otherwise freeze the page with no feedback.
+// Stores the result on the instrument itself (inst.detectedKey) so later
+// phases (Ghost Track generation) can reuse it without re-analyzing.
+function detectInstrumentKey(i) {
+  const inst = state.instruments[i];
+  if (!window.BBBAudioAnalysis) { setStatus('Key detection library not loaded — try refreshing.', 'error'); return; }
+  setStatus(`Analyzing "${inst.name}"...`, 'ok');
+  setTimeout(() => {
+    const { detectPitchContour, estimateKey } = window.BBBAudioAnalysis;
+    const contour = detectPitchContour(inst.audioBuffer.getChannelData(0), inst.audioBuffer.sampleRate);
+    const key = estimateKey(contour);
+    inst.detectedKey = key || 'none';
+    renderInstruments();
+    if (key) {
+      setStatus(`"${inst.name}" detected as ${key.tonicName} ${key.mode} (${Math.round(key.confidence * 100)}% confidence).`, 'ok');
+    } else {
+      setStatus(`"${inst.name}" has no clear pitched content to detect a key from.`, 'error');
+    }
+  }, 20);
 }
 
 function populateInstrumentSelect() {
@@ -420,6 +479,73 @@ document.getElementById('btnRecordSample').addEventListener('click', async () =>
 
 document.getElementById('btnStopRecord').addEventListener('click', () => {
   if (activeRecorder && activeRecorder.state === 'recording') activeRecorder.stop();
+});
+
+// --- Load an existing .bbbmod file back into the editor (device upload,
+// e.g. something downloaded earlier from this same Tracker, or one of the
+// official tracks). Reuses decodeBBBMOD/instrumentToAudioBuffer from
+// bbbmod-player.js (already loaded on this page for the floating widget)
+// rather than duplicating decode logic. v1 scope: only files that match
+// this editor's fixed shape (5 channels, 128 rows, 1 pattern) load cleanly --
+// that covers everything ever exported from this Tracker. A file with a
+// different shape (e.g. a real classic Amiga .MOD, or a multi-pattern
+// .bbbmod from some future editor version) is rejected with a clear error
+// rather than silently truncated/corrupted.
+document.getElementById('songUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const arrayBuf = await file.arrayBuffer();
+    const song = decodeBBBMOD(arrayBuf);
+
+    if (song.channelCount > CHANNELS) {
+      setStatus(`Can't load "${file.name}": has ${song.channelCount} channels, this editor only supports up to ${CHANNELS}.`, 'error');
+      return;
+    }
+    if (song.patterns.length !== 1) {
+      setStatus(`Can't load "${file.name}": has ${song.patterns.length} patterns, this editor only supports single-pattern songs.`, 'error');
+      return;
+    }
+    if (song.patterns[0].rows > ROWS) {
+      setStatus(`Can't load "${file.name}": has ${song.patterns[0].rows} rows, this editor only supports up to ${ROWS}.`, 'error');
+      return;
+    }
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    state.instruments = song.instruments.map(inst => ({
+      name: inst.name,
+      audioBuffer: instrumentToAudioBuffer(ctx, inst),
+      volume: inst.volume,
+    }));
+    // Remap cell-by-cell rather than a flat byte copy: the loaded song may use
+    // fewer channels/rows than this editor supports (e.g. a 4-channel song
+    // into the 5-channel grid), so the source and destination byte layouts
+    // don't line up 1:1. Anything beyond the song's own shape stays empty
+    // (state.cells starts zeroed).
+    state.cells.fill(0);
+    const srcChannels = song.channelCount;
+    const srcRows = song.patterns[0].rows;
+    const srcCells = song.patterns[0].cells;
+    for (let row = 0; row < srcRows; row++) {
+      for (let ch = 0; ch < srcChannels; ch++) {
+        const srcOff = (row * srcChannels + ch) * 5;
+        const dstOff = cellOffset(row, ch);
+        for (let b = 0; b < 5; b++) state.cells[dstOff + b] = srcCells[srcOff + b];
+      }
+    }
+
+    document.getElementById('songName').value = song.songName;
+    document.getElementById('tempo').value = song.tempo;
+    document.getElementById('speed').value = song.speed;
+
+    renderInstruments();
+    renderGrid();
+    setStatus(`Loaded "${song.songName || file.name}" — ${song.instruments.length} instrument(s).`, 'ok');
+  } catch (err) {
+    setStatus(`Could not load "${file.name}": ${err.message}`, 'error');
+  } finally {
+    e.target.value = '';
+  }
 });
 
 // --- Preset instrument picker: synthesizes instantly via preset-synth.js,
@@ -750,6 +876,67 @@ document.getElementById('btnPublish').addEventListener('click', async () => {
     btn.disabled = !authState.isPatron ? true : false;
   }
 });
+
+// --- Publish a raw .xm file directly, bypassing the grid editor entirely --
+// this editor's own encoder only ever produces .bbbmod, so a .xm upload here
+// is always someone's pre-made file from real tracker software, not
+// something built on this page.
+let selectedXmFile = null;
+document.getElementById('xmUpload').addEventListener('change', (e) => {
+  selectedXmFile = e.target.files[0] || null;
+  document.getElementById('xmFileName').textContent = selectedXmFile ? selectedXmFile.name : '';
+  document.getElementById('btnPublishXm').disabled = !selectedXmFile || !authState.isPatron;
+});
+
+function setXmStatus(msg, kind) {
+  const el = document.getElementById('tkXmStatus');
+  el.textContent = msg;
+  el.style.color = kind === 'error' ? '#e05b5b' : kind === 'ok' ? 'var(--glow)' : 'var(--fg3)';
+}
+
+document.getElementById('btnPublishXm').addEventListener('click', async () => {
+  if (!authState.loggedIn) { setXmStatus('Sign in with Patreon first.', 'error'); return; }
+  if (!authState.isPatron) { setXmStatus('Publishing needs an active $10+/mo Patreon membership.', 'error'); return; }
+  if (!selectedXmFile) { setXmStatus('Choose a .xm file first.', 'error'); return; }
+
+  const btn = document.getElementById('btnPublishXm');
+  btn.disabled = true;
+  setXmStatus('Publishing…');
+  try {
+    const form = new FormData();
+    form.append('modfile', selectedXmFile, selectedXmFile.name);
+    const resp = await fetch('/api/mods/publish', { method: 'POST', body: form, credentials: 'same-origin' });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || `publish failed (${resp.status})`);
+    setXmStatus(`Published "${data.title}" — it's live in the floating player now.`, 'ok');
+    selectedXmFile = null;
+    document.getElementById('xmUpload').value = '';
+    document.getElementById('xmFileName').textContent = '';
+    refreshMyMods();
+  } catch (err) {
+    setXmStatus('Publish failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = true; // stays disabled until a new file is chosen
+  }
+});
+
+// --- Curated classics list, same /api/mods response the floating player
+// itself uses -- this is purely informational (playback is via the FAB),
+// so it's a static grid, not another player instance.
+fetch('/api/mods', { credentials: 'same-origin' })
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById('tkClassicsList');
+    const classics = data.classics || [];
+    if (classics.length === 0) { el.textContent = 'Unavailable right now.'; return; }
+    el.innerHTML = classics.map(c =>
+      `<div style="padding:8px 10px;border:1px solid var(--border);border-radius:2px" title="${c.license || ''}">
+        <div style="color:var(--ink)">${c.title}</div>
+        <div style="color:var(--fg3);font-size:.9em">by ${c.author}</div>
+      </div>`
+    ).join('');
+  })
+  .catch(() => { document.getElementById('tkClassicsList').textContent = 'Could not load — try refreshing.'; });
 
 renderInstruments();
 renderGrid();

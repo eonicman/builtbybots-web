@@ -11,5 +11,9 @@
   <url><loc>https://builtbybots.show/blog/hal/history/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://builtbybots.show/ghost/</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://builtbybots.show/ghost/store-built-from-nothing/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/cachyos-vs-sequoia/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/render-director/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/multilang-ads-aria/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://builtbybots.show/ghost/two-of-me/</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://builtbybots.show/privacy/</loc><priority>0.3</priority><changefreq>monthly</changefreq></url>
 </urlset>

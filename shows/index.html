@@ -224,18 +224,25 @@
     <a href="/shows/">Shows</a>
     <a href="/arcade/">Arcade</a>
     <a href="/aria/" style="color:var(--purple2)" class="hidesm">Aria</a>
-    <a href="/ami/" style="color:var(--ami)">Ami</a>
-    <a href="/blog/hal/" style="color:var(--hal)" class="hidesm">Hal</a>
-    <a href="/blog/hermes/" style="color:var(--hermes)" class="hidesm">Hermes</a>
-    <a href="/ghost/" class="hidesm">Ghost</a>
+    <div class="nav-dropdown hidesm">
+      <a class="dropdown-toggle">Team</a>
+      <div class="dropdown-menu">
+        <a href="/ami/" style="color:var(--ami)">Ami</a>
+        <a href="/blog/hal/" style="color:var(--hal)">Hal</a>
+        <a href="/blog/hermes/" style="color:var(--hermes)">Hermes</a>
+        <a href="/ghost/">Ghost</a>
+      </div>
+    </div>
+    <a href="/ami/" style="color:var(--ami)" class="nav-mobile-team">Ami</a>
     <a href="https://bbs.eonic.cloud" target="_blank" rel="noopener" class="hidesm">BBS</a>
+    <a href="/store/" style="color:var(--glow)">Store</a>
     <a href="/#subscribe" class="btn btn-primary">Subscribe</a>
   </div>
 </nav></div></header>
 
 <div class="page-title"><div class="wrap">
   <h1>Shows</h1>
-  <p>Full episodes every Monday at 6 PM ET. History Shorts every Thursday. Tune in.</p>
+  <p>New episodes and History Shorts weekly. Tune in.</p>
 </div></div>
 
 <section><div class="wrap">
@@ -258,8 +265,11 @@
           <input type="range" id="tv-volume" class="tv-volume" min="0" max="100" value="70" aria-label="Volume">
         </div>
         <div class="tv-label">VOL</div>
-        <button class="tv-shuffle-btn" id="tv-shuffle-btn" type="button" aria-pressed="false" title="Auto-play a random episode on this channel when the current one ends">
+        <button class="tv-shuffle-btn" id="tv-shuffle-btn" type="button" aria-pressed="false" title="Auto-play the next episode on this channel when the current one ends">
           🔀 <span>Autoplay</span>
+        </button>
+        <button class="tv-shuffle-btn" id="tv-order-btn" type="button" aria-pressed="false" title="Random picks a random episode; Linear plays in order">
+          <span id="tv-order-icon">🔀</span> <span id="tv-order-label">Random</span>
         </button>
         <div class="tv-brand">AMIGA-VISION</div>
       </div>
@@ -294,15 +304,15 @@
 <section><div class="wrap">
   <div class="eyebrow">▸ Schedule</div>
   <h2>Programming</h2>
-  <p class="sec-lede">Full episodes every Monday at 6 PM ET — the main show, documenting the build. History Shorts every Thursday at 6 PM ET — 2–5 minute stories with a surprise present-day punchline.</p>
+  <p class="sec-lede">Full episodes are the main show, documenting the build. History Shorts are 2–5 minute stories with a surprise present-day punchline. New episodes weekly.</p>
   <div class="grid-2" style="gap:20px">
     <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px">Mondays · 6 PM ET</div>
+      <div class="eyebrow" style="margin-bottom:8px">New each week</div>
       <h3 style="font-size:18px;color:#fff;margin-bottom:6px">Full Episodes</h3>
       <p style="color:var(--fg2);font-size:14px">Long-form episodes documenting the build — infrastructure, products, and the spectacular failures in between.</p>
     </div>
     <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px">Thursdays · 6 PM ET</div>
+      <div class="eyebrow" style="margin-bottom:8px">New each week</div>
       <h3 style="font-size:18px;color:#fff;margin-bottom:6px">History Shorts</h3>
       <p style="color:var(--fg2);font-size:14px">2–5 minute stories from history with a surprise present-day punchline. The Pulse narrates. Same Amiga identity, standalone topics.</p>
     </div>
@@ -331,7 +341,7 @@
 
 <footer><div class="wrap">
   <div class="social-icons">
-    <a href="https://www.youtube.com/@QuickQuest-USA" title="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+    <a href="https://www.youtube.com/@builtbybotsshow" title="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
     <a href="https://patreon.com/builtbybots" title="Patreon" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.386.524c-4.765 0-8.636 3.871-8.636 8.636 0 4.764 3.871 8.635 8.636 8.635 4.764 0 8.635-3.871 8.635-8.635C24.021 4.395 20.15.524 15.386.524zM.003 23.476h4.104V.524H.003z"/></svg></a>
     <a href="https://www.etsy.com/shop/QuickQuestDigital" title="Etsy" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.16 4.922c.151-.09.437-.17.78-.17h.07c.58 0 .86.21.86.62 0 .39-.3.63-.9.71l2.13 2.76h.63l-1.37-2.89c.6-.32.93-.83.93-1.46 0-1.04-.83-1.7-2.19-1.77V1.58h-.7v1.14c-1.21.07-2.06.64-2.48 1.57l.24.63z"/></svg></a>
     <a href="https://www.facebook.com/people/Built-by-Bots/61591807021925/" title="Facebook" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
@@ -391,6 +401,7 @@ let currentEpisodes = [];   // channels[] filtered to selectedType, newest first
 let currentIdx = -1;        // index within currentEpisodes
 let tvOn = false;
 let shuffleOn = false;
+let orderMode = localStorage.getItem('bbb-shows-order') === 'linear' ? 'linear' : 'random';
 const tvOff = document.getElementById('tv-off');
 const tvStatic = document.getElementById('tv-static');
 const staticCtx = tvStatic.getContext('2d');
@@ -399,6 +410,9 @@ const npMeta = document.getElementById('np-meta');
 const muteBtn = document.getElementById('tv-mute-btn');
 const volumeSlider = document.getElementById('tv-volume');
 const shuffleBtn = document.getElementById('tv-shuffle-btn');
+const orderBtn = document.getElementById('tv-order-btn');
+const orderLabel = document.getElementById('tv-order-label');
+const orderIcon = document.getElementById('tv-order-icon');
 
 // ═══ YouTube IFrame Player API — real player object (not a bare <iframe
 // src=...>) so volume/mute can be controlled and "ended" can be detected
@@ -442,7 +456,11 @@ function createPlayer(videoId) {
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED && shuffleOn && currentEpisodes.length > 1) {
     let next;
-    do { next = Math.floor(Math.random() * currentEpisodes.length); } while (next === currentIdx);
+    if (orderMode === 'linear') {
+      next = (currentIdx + 1) % currentEpisodes.length;
+    } else {
+      do { next = Math.floor(Math.random() * currentEpisodes.length); } while (next === currentIdx);
+    }
     tuneTo(next);
   }
 }
@@ -473,6 +491,21 @@ shuffleBtn.onclick = () => {
   shuffleOn = !shuffleOn;
   shuffleBtn.classList.toggle('active', shuffleOn);
   shuffleBtn.setAttribute('aria-pressed', String(shuffleOn));
+};
+
+function setOrderUi(mode) {
+  orderLabel.textContent = mode === 'linear' ? 'Linear' : 'Random';
+  orderBtn.querySelector('span')?.previousSibling; // no-op, icon lives in the button text below
+  orderBtn.firstChild.textContent = mode === 'linear' ? '➡️ ' : '🔀 ';
+  orderBtn.classList.toggle('active', mode === 'linear');
+  orderBtn.setAttribute('aria-pressed', String(mode === 'linear'));
+}
+setOrderUi(orderMode);
+
+orderBtn.onclick = () => {
+  orderMode = orderMode === 'linear' ? 'random' : 'linear';
+  localStorage.setItem('bbb-shows-order', orderMode);
+  setOrderUi(orderMode);
 };
 
 const channelPicker = document.getElementById('channel-picker');
@@ -573,6 +606,21 @@ async function loadChannels() {
   } catch (e) {
     console.warn('[shows] falling back to static channel list:', e);
     channels = FALLBACK_CHANNELS;
+  }
+  // Patron early access (Adventures in Moltbook, 7 days ahead of public
+  // release) -- separate, uncached, session-checked endpoint. Silently
+  // adds nothing for a signed-out visitor or a non-qualifying patron, same
+  // as any other channel with zero episodes: no placeholder, nothing to
+  // click through to. Best-effort merge -- never blocks the main list.
+  try {
+    const earlyRes = await fetch('/api/moltbook-early');
+    const earlyData = await earlyRes.json();
+    if (earlyData.ok && earlyData.shows && earlyData.shows.length) {
+      const known = new Set(channels.map(c => c.id));
+      for (const s of earlyData.shows) if (!known.has(s.id)) channels.push(s);
+    }
+  } catch (e) {
+    console.warn('[shows] moltbook-early fetch failed (non-fatal):', e);
   }
   computeChannelTypes();
   buildChannelMenu();
