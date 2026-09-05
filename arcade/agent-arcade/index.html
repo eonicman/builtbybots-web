@@ -224,6 +224,39 @@
     ctx.restore();
   }
 
+  function drawTeamBadge(ctx, cx, cy, r, color, mouth) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.globalAlpha = 0.16;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 4;
+      const x = r * Math.cos(a), y = r * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.globalAlpha = 0.34;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.globalAlpha = 0.46;
+    ctx.fillStyle = color;
+    const ex = r * 0.28, ey = -r * 0.05, er = r * 0.09;
+    ctx.beginPath(); ctx.arc(-ex, ey, er, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    const my = r * 0.24;
+    if (mouth === 'smile') ctx.arc(0, my - r * 0.06, r * 0.2, 0.15 * Math.PI, 0.85 * Math.PI);
+    else if (mouth === 'frown') ctx.arc(0, my + r * 0.18, r * 0.2, 1.15 * Math.PI, 1.85 * Math.PI);
+    else { ctx.moveTo(-r * 0.16, my); ctx.lineTo(r * 0.16, my); }
+    ctx.lineWidth = Math.max(1.5, r * 0.035);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function draw() {
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, W, H);
@@ -235,6 +268,7 @@
     ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H);
     ctx.stroke();
     ctx.setLineDash([]);
+    drawTeamBadge(ctx, W / 2, H / 2, 48, '#D2843F', 'frown');
 
     // phosphor trail
     for (let i = 0; i < trail.length; i++) {
